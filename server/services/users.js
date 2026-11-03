@@ -3,7 +3,7 @@ import { getMongoDb } from "../db/mongo.js";
 
 const USERS_COLLECTION = 'users';
 
-export async function getUsers(){
+export async function getAllUsers(){
     return getMongoDb()
         .collection(USERS_COLLECTION)
         .find({})
@@ -18,7 +18,7 @@ export async function getUser(userId){
         });
 }
 
-export async function addUser(user = { email, passwordHash, firstName, lastName, role }){
+export async function insertUser(user = { email, passwordHash, firstName, lastName, role, createdAt, updatedAt }){
     return getMongoDb()
         .collection(USERS_COLLECTION)
         .insertOne(user);
