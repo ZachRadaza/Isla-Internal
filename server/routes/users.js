@@ -3,19 +3,25 @@ import { insertUser, getUser, getAllUsers } from "../services/users.js";
 
 const usersRouter = Router();
 
-const getUserFields = (user) => {
+const requireEmail = (req, res, next) => {
+    if(typeof req.body?.email !== 'string')
+        return res.status(404).json({
+            message: 'Email required'
+        });
+
+    next();
+}
+
+const requireUserFields = (req, res, next) => {
+    const user = req.body;
+
     const validFields = user?.email && user?.passwordHash && user?.firstName && user?.lastName && user?.role;
-
     if(!validFields)
-        return null;
+        return res.status(404).json({
+            message: 'missing fields for user required'
+        });
 
-    return {
-        email: user?.email,
-        passwordHash: user?.passwordHash, 
-        firstName: user?.firstName,
-        lastName: user?.lastName,
-        role: user?.role
-    };
+    next();
 }
 
 async function listAllUsers(req, res, next){
@@ -45,14 +51,16 @@ async function listUser(req, res, next){
 
 async function registerUser(req, res, next){
     try{
-        const userAddReq = getUserFields(req.body);
+        const userToAdd = {
+            email: req.body.email,
+            passwordHash: req.body.passwordHash, 
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            role: req.body.role,
+            createdAt: new Date(), 
+            updatedAt: null
+        };
 
-        if(!userAddReq)
-            return res.status(404).json({
-                error: 'user lacking fields'
-            });
-
-        const userToAdd = { createdAt: new Date(), updatedAt: null, ...userAddReq };
         const addedUserId = await insertUser(userToAdd);
         const addedUser = { _id: addedUserId?.insertedId, ...userToAdd };
 
@@ -62,7 +70,7 @@ async function registerUser(req, res, next){
     }
 }
 
-usersRouter.post('/register', registerUser);
+usersRouter.post('/register', requireEmail, requireUserFields, registerUser);
 usersRouter.get('/', listAllUsers);
 usersRouter.get('/:userid', listUser);
 
