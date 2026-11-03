@@ -23,3 +23,11 @@ export async function insertUser(user = { email, passwordHash, firstName, lastNa
         .collection(USERS_COLLECTION)
         .insertOne(user);
 }
+
+export async function checkExistingUser(email){
+    const user = await getMongoDb()
+        .collection(USERS_COLLECTION)
+        .findOne({ email });
+
+    return !!user;
+}

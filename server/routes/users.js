@@ -1,12 +1,24 @@
 import { Router } from "express";
-import { insertUser, getUser, getAllUsers } from "../services/users.js";
+import { insertUser, getUser, getAllUsers, checkExistingUser } from "../services/users.js";
+import bcrypt from "bcryptjs";
 
 const usersRouter = Router();
 
 const requireEmail = (req, res, next) => {
-    if(typeof req.body?.email !== 'string')
+    const email = req.body?.email;
+    if(typeof email !== 'string' || !email)
         return res.status(404).json({
             message: 'Email required'
+        });
+
+    next();
+}
+
+const requirePassword = (req, res, next) => {
+    const password = req.body?.password;
+    if(typeof password !== 'string' || !password)
+        return res.status(404).json({
+            message: 'Password required'
         });
 
     next();
@@ -15,7 +27,7 @@ const requireEmail = (req, res, next) => {
 const requireUserFields = (req, res, next) => {
     const user = req.body;
 
-    const validFields = user?.email && user?.passwordHash && user?.firstName && user?.lastName && user?.role;
+    const validFields = user?.email && user?.password && user?.firstName && user?.lastName && user?.role;
     if(!validFields)
         return res.status(404).json({
             message: 'missing fields for user required'
@@ -51,9 +63,20 @@ async function listUser(req, res, next){
 
 async function registerUser(req, res, next){
     try{
+        const { email, password } = req.body;
+
+        const userExists = await checkExistingUser(email);
+
+        if(userExists)
+            return res.status(404).json({
+                message: 'user already exists'
+            });
+
+        const passwordHash = await bcrypt.hash(password, 12);
+
         const userToAdd = {
-            email: req.body.email,
-            passwordHash: req.body.passwordHash, 
+            email,
+            passwordHash: passwordHash, 
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             role: req.body.role,
@@ -64,13 +87,13 @@ async function registerUser(req, res, next){
         const addedUserId = await insertUser(userToAdd);
         const addedUser = { _id: addedUserId?.insertedId, ...userToAdd };
 
-        res.json(addedUser);
+        res.status(201).json(addedUser);
     } catch(error){
         next(error);
     }
 }
 
-usersRouter.post('/register', requireEmail, requireUserFields, registerUser);
+usersRouter.post('/register', requireEmail, requirePassword, requireUserFields, registerUser);
 usersRouter.get('/', listAllUsers);
 usersRouter.get('/:userid', listUser);
 
