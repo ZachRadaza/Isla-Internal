@@ -1,23 +1,22 @@
 import { MongoClient } from 'mongodb';
 
-const DB_WALKTHROUGH = 'walkthroughs';
-const DB_AUTH = 'auth';
+const DB_MODE = Object.freeze({
+    'dev': 'development_db',
+    'qa': 'qa_db',
+    'prod': 'prod_db'
+});
 
 const client = new MongoClient(process.env.MONGO_URI);
-let walkthroughsDb;
-let authDb;
+const mode = process.env.MODE;
+
+let mongoDb;
 
 export async function connectToMongoDB(){
     try {
         await client.connect();
 
-        walkthroughsDb = client.db(DB_WALKTHROUGH);
-        console.log("connected to walkthrough db");
-
-        authDb = client.db(DB_AUTH);
-        console.log("connected to auth db");
-
-        console.log("all dbs connected");
+        mongoDb = client.db(DB_MODE[mode]);
+        console.log(`connected to ${mode} db`);
     } catch (err) {
         console.error('mongodb connection failed', err);
         throw err;
@@ -28,9 +27,7 @@ export async function disconnectFromMongoDB() {
     await client.close();
 }
 
-export const getWalkthroughsDb = () => requireDb(walkthroughsDb);
-export const getAuthDb = () => requireDb(authDb);
-
+export const getMongoDb = () => requireDb(mongoDb);
 
 function requireDb(db){
     if(!db)
