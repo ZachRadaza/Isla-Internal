@@ -2,14 +2,26 @@ import "dotenv/config";
 import express from "express";
 import mainRouter from "./routes/routes.js";
 import { connectToMongoDB, disconnectFromMongoDB } from "./db/mongo.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const origin = Object.freeze({
+    'DEV': 'http://localhost:5173',
+    'QA': 'http://futureqalink',
+    'PROD': 'http://futureprodlink'
+});
 
 await connectToMongoDB();
 
 // Middleware
+app.use(cors({
+    origin: origin,
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // routing
 app.use("/api", mainRouter);
