@@ -6,16 +6,26 @@ const USERS_COLLECTION = 'users';
 export async function getAllUsers(){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .find({})
+        .find({ projection: { passwordHash: 0 } })
         .toArray();
 }
 
-export async function getUser(userId){
+export async function getUserById(userId){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .findOne({
-            _id: new ObjectId(userId)
-        });
+        .findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { passwordHash: 0 } }
+        );
+}
+
+export async function getUserByEmail(email){
+    return getMongoDb()
+        .collection(USERS_COLLECTION)
+        .findOne(
+            { email },
+            { projection: { passwordHash: 0 }}
+        );
 }
 
 export async function insertUser(user = { email, passwordHash, firstName, lastName, role, createdAt, updatedAt }){
@@ -25,9 +35,7 @@ export async function insertUser(user = { email, passwordHash, firstName, lastNa
 }
 
 export async function checkExistingUser(email){
-    const user = await getMongoDb()
-        .collection(USERS_COLLECTION)
-        .findOne({ email });
+    const user = await getUserByEmail(email);
 
     return !!user;
 }

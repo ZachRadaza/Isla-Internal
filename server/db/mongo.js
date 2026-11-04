@@ -1,9 +1,9 @@
 import { MongoClient } from 'mongodb';
 
 const DB_MODE = Object.freeze({
-    'dev': 'development_db',
-    'qa': 'qa_db',
-    'prod': 'prod_db'
+    'DEV': 'development_db',
+    'QA': 'qa_db',
+    'PROD': 'prod_db'
 });
 
 const client = new MongoClient(process.env.MONGO_URI);

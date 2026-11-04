@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { insertUser, getUser, getAllUsers, checkExistingUser } from "../services/users.js";
+import { insertUser, getUserById, getAllUsers, checkExistingUser, getUserByEmail } from "../services/users.js";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { requireAuth } from "../middleware/auth.js";
 
 const usersRouter = Router();
 
@@ -48,7 +50,7 @@ async function listAllUsers(req, res, next){
 
 async function listUser(req, res, next){
     try{
-        const user = await getUser(req.params?.userid);
+        const user = await getUserById(req.params?.userid);
 
         if(!user)
             return res.status(404).json({
@@ -76,7 +78,6 @@ async function registerUser(req, res, next){
 
         const userToAdd = {
             email,
-            passwordHash: passwordHash, 
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             role: req.body.role,
@@ -84,7 +85,7 @@ async function registerUser(req, res, next){
             updatedAt: null
         };
 
-        const addedUserId = await insertUser(userToAdd);
+        const addedUserId = await insertUser({ ...userToAdd, passwordHash: passwordHash });
         const addedUser = { _id: addedUserId?.insertedId, ...userToAdd };
 
         res.status(201).json(addedUser);
@@ -93,8 +94,59 @@ async function registerUser(req, res, next){
     }
 }
 
+async function loginUser(req, res, next){
+    try{
+        const { email, password } = req.body;
+
+        const userToSignIn = await getUserByEmail(email);
+
+        if(!userToSignIn)
+            return res.status(401).json({
+                message: 'Invalid email or password'
+            });
+
+        const passwordMatches = await bcrypt.compare(password, userToSignIn.passwordHash);
+
+        if(!passwordMatches)
+            return res.status(401).json({
+                message: 'Invalid email or password'
+            });
+
+        const token = jwt.sign({
+            userId: userToSignIn._id.toString(),
+            email: userToSignIn.email
+        }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        res.json({
+            message: 'logged in',
+            token
+        });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function listCurrentUser(req, res, next){
+    try{
+        const { userId } = req.authUser;
+
+        const user = await getUserById(userId);
+
+        if(!user)
+            return res.status(404).json({
+                message: 'user does not exist'
+            });
+
+        res.json(user);
+    } catch(error){
+        next(error);
+    }
+}
+
 usersRouter.post('/register', requireEmail, requirePassword, requireUserFields, registerUser);
-usersRouter.get('/', listAllUsers);
-usersRouter.get('/:userid', listUser);
+usersRouter.post('/login', requireEmail, requirePassword, loginUser);
+usersRouter.get('/mirror', requireAuth, listCurrentUser);
+usersRouter.get('/', requireAuth, listAllUsers);
+usersRouter.get('/:userid', requireAuth, listUser);
 
 export default usersRouter;
