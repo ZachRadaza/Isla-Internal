@@ -22,10 +22,7 @@ export async function getUserById(userId){
 export async function getUserByEmail(email){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .findOne(
-            { email },
-            { projection: { passwordHash: 0 }}
-        );
+        .findOne({ email });
 }
 
 export async function insertUser(user = { email, passwordHash, firstName, lastName, role, createdAt, updatedAt }){

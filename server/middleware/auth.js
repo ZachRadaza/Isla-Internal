@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 
-export function requireAuth(req, res, next){
-    const authHeader = req.headers?.authorization;
+export const isSecureCookies = process.env.MODE !== "DEV";
 
-    if(!authHeader || !authHeader.startsWith("Bearer "))
+export function requireAuth(req, res, next) {
+    const token = req.cookies?.token;
+
+    if(!token)
         return res.status(401).json({
             message: 'Authentication required'
         });
-
-    const token = authHeader.split(" ")[1];
 
     try{
         const decodedUser = jwt.verify(
@@ -19,7 +19,7 @@ export function requireAuth(req, res, next){
         req.authUser = decodedUser;
         next();
     } catch {
-        return res.status(403).json({
+        return res.status(401).json({
             message: "Invalid or expired token"
         });
     }

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { insertUser, getUserById, getAllUsers, checkExistingUser, getUserByEmail } from "../services/users.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { requireAuth } from "../middleware/auth.js";
+import { isSecureCookies, requireAuth } from "../middleware/auth.js";
 
 const usersRouter = Router();
 
@@ -117,10 +117,31 @@ async function loginUser(req, res, next){
             email: userToSignIn.email
         }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: isSecureCookies,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 1000
+        });
+
         res.json({
             message: 'logged in',
-            token
         });
+    } catch(error){
+        next(error);
+    }
+}
+
+function logoutUser(req, res, next){
+    try{
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: isSecureCookies,
+            sameSite: "lax",
+            path: "/"
+        });
+        
+        res.json({ message: "Logged out" });
     } catch(error){
         next(error);
     }
@@ -145,6 +166,7 @@ async function listCurrentUser(req, res, next){
 
 usersRouter.post('/register', requireEmail, requirePassword, requireUserFields, registerUser);
 usersRouter.post('/login', requireEmail, requirePassword, loginUser);
+usersRouter.post('/logout', requireAuth, logoutUser);
 usersRouter.get('/mirror', requireAuth, listCurrentUser);
 usersRouter.get('/', requireAuth, listAllUsers);
 usersRouter.get('/:userid', requireAuth, listUser);
