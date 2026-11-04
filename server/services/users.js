@@ -3,23 +3,39 @@ import { getMongoDb } from "../db/mongo.js";
 
 const USERS_COLLECTION = 'users';
 
-export async function getUsers(){
+export async function getAllUsers(){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .find({})
+        .find({ projection: { passwordHash: 0 } })
         .toArray();
 }
 
-export async function getUser(userId){
+export async function getUserById(userId){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .findOne({
-            _id: new ObjectId(userId)
-        });
+        .findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { passwordHash: 0 } }
+        );
 }
 
-export async function addUser(user = { email, passwordHash, firstName, lastName, role }){
+export async function getUserByEmail(email){
+    return getMongoDb()
+        .collection(USERS_COLLECTION)
+        .findOne(
+            { email },
+            { projection: { passwordHash: 0 }}
+        );
+}
+
+export async function insertUser(user = { email, passwordHash, firstName, lastName, role, createdAt, updatedAt }){
     return getMongoDb()
         .collection(USERS_COLLECTION)
         .insertOne(user);
+}
+
+export async function checkExistingUser(email){
+    const user = await getUserByEmail(email);
+
+    return !!user;
 }
