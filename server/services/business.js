@@ -14,10 +14,10 @@ export async function getAllBusiness(){
 export async function getBusiness(businessId){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
-        .findOne({ _id: ObjectId(businessId) });
+        .findOne({ _id: new ObjectId(businessId) });
 }
 
-export async function checkExistingBusiness(name){
+export async function checkExistingBusinessByName(name){
     const business = await getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .findOne({ name });
@@ -25,10 +25,18 @@ export async function checkExistingBusiness(name){
     return !!business
 }
 
+export async function checkExistingBusinessById(businessId){
+    const business = await getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .findOne({ _id: new ObjectId(businessId) });
+
+    return !!business;
+}
+
 export async function insertBusiness({ name, createdById, createdAt, updatedAt }){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
-        .insertOne({ name, createdById, createdAt, updatedAt });
+        .insertOne({ name, createdById: new ObjectId(createdById), createdAt, updatedAt });
 }
 
 export async function updateBusiness({ updates, businessId }){
@@ -54,7 +62,13 @@ export async function removeBusiness(businessId){
 export async function addUserToBusiness({ userId, businessId, role, createdAt, updatedAt }){
     return getMongoDb()
         .collection(BUSINESS_MEMBERS_COLLECTION)
-        .insertOne({ userId, businessId, role, createdAt, updatedAt });
+        .insertOne({ 
+            userId: new ObjectId(userId), 
+            businessId: new ObjectId(businessId), 
+            role, 
+            createdAt, 
+            updatedAt 
+        });
 }
 
 export async function removeUserFromBusiness({ businessId, userId }){
@@ -64,4 +78,12 @@ export async function removeUserFromBusiness({ businessId, userId }){
             userId: new ObjectId(userId), 
             businessId: new ObjectId(businessId) 
         });
+}
+
+export async function checkExistingMember({ businessId, userId }){
+    const member = await getMongoDb()
+        .collection(BUSINESS_MEMBERS_COLLECTION)
+        .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
+
+    return !!member;
 }
