@@ -3,6 +3,7 @@ import { insertUser, getUserById, getAllUsers, checkExistingUser, getUserByEmail
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { isSecureCookies, requireAuth } from "../middleware/auth.js";
+import { isValidString } from "../services/utils.js";
 
 const usersRouter = Router();
 
@@ -26,15 +27,31 @@ const requirePassword = (req, res, next) => {
     next();
 }
 
-const requireUserFields = (req, res, next) => {
-    const user = req.body;
+const extractUserFields = (req, res, next) => {
+    const { email, password, firstName, lastName, role } = req.body;
 
-    const validFields = user?.email && user?.password && user?.firstName && user?.lastName && user?.role;
+    const validFields = (
+        isValidString(email) && 
+        isValidString(password) && 
+        isValidString(firstName) && 
+        isValidString(lastName) && 
+        isValidString(role)
+    );
+
     if(!validFields)
         return res.status(404).json({
-            message: 'missing fields for user required'
+            message: 'missing or invalid fields for user required'
         });
 
+    req.user = { 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        role,
+        createdAt: new Date(), 
+        updatedAt: null 
+    };
     next();
 }
 
@@ -65,30 +82,21 @@ async function listUser(req, res, next){
 
 async function registerUser(req, res, next){
     try{
-        const { email, password } = req.body;
+        const user = req.user;
 
-        const userExists = await checkExistingUser(email);
+        const userExists = await checkExistingUser(user.email);
 
         if(userExists)
             return res.status(404).json({
                 message: 'user already exists'
             });
 
-        const passwordHash = await bcrypt.hash(password, 12);
+        const passwordHash = await bcrypt.hash(user.password, 12);
 
-        const userToAdd = {
-            email,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            role: req.body.role,
-            createdAt: new Date(), 
-            updatedAt: null
-        };
+        const addedUserId = await insertUser({ ...user, passwordHash });
+        const addedUser = { _id: addedUserId?.insertedId, ...user };
 
-        const addedUserId = await insertUser({ ...userToAdd, passwordHash: passwordHash });
-        const addedUser = { _id: addedUserId?.insertedId, ...userToAdd };
-
-        res.status(201).json(addedUser);
+        res.status(201).json({ user: addedUser });
     } catch(error){
         next(error);
     }
@@ -164,7 +172,7 @@ async function listCurrentUser(req, res, next){
     }
 }
 
-usersRouter.post('/register', requireEmail, requirePassword, requireUserFields, registerUser);
+usersRouter.post('/register', requireEmail, requirePassword, extractUserFields, registerUser);
 usersRouter.post('/login', requireEmail, requirePassword, loginUser);
 usersRouter.post('/logout', requireAuth, logoutUser);
 usersRouter.get('/mirror', requireAuth, listCurrentUser);
