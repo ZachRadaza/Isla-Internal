@@ -25,10 +25,10 @@ export async function getUserByEmail(email){
         .findOne({ email });
 }
 
-export async function insertUser({ email, passwordHash, firstName, lastName, role, createdAt, updatedAt }){
+export async function insertUser({ email, passwordHash, firstName, lastName, createdAt, updatedAt }){
     return getMongoDb()
         .collection(USERS_COLLECTION)
-        .insertOne({ email, passwordHash, firstName, lastName, role, createdAt, updatedAt });
+        .insertOne({ email, passwordHash, firstName, lastName, createdAt, updatedAt });
 }
 
 export async function checkExistingUser(email){

@@ -28,14 +28,13 @@ const requirePassword = (req, res, next) => {
 }
 
 const extractUserFields = (req, res, next) => {
-    const { email, password, firstName, lastName, role } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
     const validFields = (
         isValidString(email) && 
         isValidString(password) && 
         isValidString(firstName) && 
-        isValidString(lastName) && 
-        isValidString(role)
+        isValidString(lastName)
     );
 
     if(!validFields)
@@ -48,7 +47,6 @@ const extractUserFields = (req, res, next) => {
         password, 
         firstName, 
         lastName, 
-        role,
         createdAt: new Date(), 
         updatedAt: null 
     };
