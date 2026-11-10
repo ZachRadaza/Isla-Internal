@@ -3,6 +3,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { insertBusiness, checkExistingBusinessByName, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, checkExistingMember, checkExistingBusinessById } from "../services/business.js";
 import { isValidString } from "../services/utils.js";
 import { getDefaultRoleId, getOwnerRoleId } from "../services/roles.js";
+import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
 
 const businessRouter = Router();
 
@@ -97,13 +98,13 @@ async function listBusiness(req, res, next){
 async function createBusiness(req, res, next){
     try{
         const business = await insertBusiness(req.business);
-        const businessAdded = { ...business, _id: business?.insertedId};
+        const businessAdded = { ...req.business, _id: business?.insertedId};
         const ownerRoleId = await getOwnerRoleId();
 
         const businessMember = await addUserToBusiness({ 
             userId: businessAdded.createdById, 
             businessId: businessAdded._id,
-            role: ownerRoleId,
+            roleId: ownerRoleId,
             createdAt: new Date(),
             updatedAt: null
         });
@@ -141,7 +142,7 @@ async function joinBusiness(req, res, next){
         const businessMember = await addUserToBusiness({
             userId,
             businessId,
-            role: defaultRole,
+            roleId: defaultRole,
             createdAt: new Date(),
             updatedAt: null
         });
@@ -173,8 +174,8 @@ businessRouter.post('/join/:businessId', requireAuth, requireBusinessId, require
 businessRouter.post('/leave/:businessId', requireAuth, requireBusinessId, leaveBusiness);
 
 businessRouter.post('/', requireAuth, requireBusinessName, requireUniqueName, extractBusinessFields, createBusiness);
-businessRouter.get('/', requireAuth, listAllBusiness);
-businessRouter.get('/:businessId', requireAuth, requireBusinessId, listBusiness);
-businessRouter.put('/:businessId', requireAuth, requireBusinessId, requireBusinessName, requireUniqueName, editBusiness);
+//businessRouter.get('/', requireAuth, listAllBusiness);
+businessRouter.get('/:businessId', requireAuth, requireBusinessId,  canViewBusiness, listBusiness);
+businessRouter.put('/:businessId', requireAuth, requireBusinessId, canEditBusiness, requireBusinessName, requireUniqueName, editBusiness);
 
 export default businessRouter;

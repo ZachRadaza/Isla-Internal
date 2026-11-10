@@ -59,13 +59,13 @@ export async function removeBusiness(businessId){
         .deleteOne({ _id: new ObjectId(businessId)});
 }
 
-export async function addUserToBusiness({ userId, businessId, role, createdAt, updatedAt }){
+export async function addUserToBusiness({ userId, businessId, roleId, createdAt, updatedAt }){
     return getMongoDb()
         .collection(BUSINESS_MEMBERS_COLLECTION)
         .insertOne({ 
             userId: new ObjectId(userId), 
             businessId: new ObjectId(businessId), 
-            role, 
+            roleId, 
             createdAt, 
             updatedAt 
         });
@@ -81,9 +81,13 @@ export async function removeUserFromBusiness({ businessId, userId }){
 }
 
 export async function checkExistingMember({ businessId, userId }){
-    const member = await getMongoDb()
-        .collection(BUSINESS_MEMBERS_COLLECTION)
-        .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
+    const member = await getBusinessMember({ businessId, userId });
 
     return !!member;
+}
+
+export async function getBusinessMember({ businessId, userId }){
+    return getMongoDb()
+        .collection(BUSINESS_MEMBERS_COLLECTION)
+        .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
 }
