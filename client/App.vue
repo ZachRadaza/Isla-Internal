@@ -9,7 +9,7 @@ import Header from './src/components/Header.vue';
 <style>
 
 :root{
-    --font-heading: "DM Serif Display", serif;
+    --font-heading: "Manrope", sans-serif;;
     --font-body: "DM Sans", sans-serif;
 
     --font-size-xs: 0.7rem;
@@ -28,19 +28,19 @@ import Header from './src/components/Header.vue';
     --color-red: #A94442;
     --color-blue: #315C85;
 
-    --space-1: 0.1rem;
-    --space-2: 0.25rem;
-    --space-3: 0.5rem;
-    --space-4: 0.75rem;
-    --space-5: 1rem;
-    --space-6: 1.5rem;
-    --space-7: 2rem;
-    --space-8: 3rem;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
 }
 
 html{
     font-size: var(--font-size-md);
     font-family: var(--font-body);
+    font-optical-sizing: auto;
 }
 
 body{
