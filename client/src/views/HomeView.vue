@@ -2,7 +2,7 @@
 </script>
 <template>
     <body>
-        test
+        Home Page
     </body>
 </template>
 <style scoped>

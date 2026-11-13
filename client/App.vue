@@ -54,6 +54,8 @@ h1, h2, h3, h4, h5, h6{
     margin: 0;
     color: var(--color-black);
     font-weight: var(--font-weight-lg);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 h1{ font-size: var(--font-size-xxl) }
