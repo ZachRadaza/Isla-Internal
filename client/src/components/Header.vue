@@ -1,4 +1,8 @@
 <script setup>
+import useUser from '../composables/useUser';
+
+const { user, isLoggedIn } = useUser();
+
 </script>
 <template>
     <header class="isla-header">
@@ -6,6 +10,14 @@
         <nav>
             <RouterLink to="/walkthrough">Walkthrough</RouterLink>
             <RouterLink to="/todo">To Do</RouterLink>
+            <RouterLink to="/account">
+                <template v-if="isLoggedIn">
+                    {{ user.firstName }} {{ user.lastName }}
+                </template>
+                <template v-else>
+                    Account
+                </template>
+            </RouterLink>
         </nav>
     </header>
 </template>

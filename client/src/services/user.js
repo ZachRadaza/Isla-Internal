@@ -5,10 +5,15 @@ export async function loginUser({ email, password }){
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.parse({ email, password })
+        body: JSON.stringify({ email, password })
     });
 
-    console.log(response);
+    const data = await response.json();
+
+    if(!response.ok)
+        throw new Error(data.message);
+
+    return getCurrentUser();
 }
 
 export async function registerUser(){
@@ -22,6 +27,16 @@ export async function logoutUser(){
 }
 
 export async function getCurrentUser(){
-    const response = await fetch(`${USER_ENDPOINT}/mirror`);
+    const response = await fetch(`${USER_ENDPOINT}/mirror`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+    });
 
+    const data = await response.json();
+
+    if(!response.ok)
+        throw new Error(data.message);
+
+    return data;
 }

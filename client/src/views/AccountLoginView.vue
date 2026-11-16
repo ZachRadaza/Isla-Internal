@@ -1,19 +1,18 @@
 <script setup>
 import { ref } from 'vue';
 import InputLabel from '../components/global/InputLabel.vue';
+import useUser from '../composables/useUser.js';
+
+const { login } = useUser();
 
 const email = ref('');
 const password = ref('');
-
-function loginUser(){
-
-}
 
 </script>
 <template>
 <main>
     <div class="account-box">
-        <form @submit.prevent="loginUser">
+        <form @submit.prevent="login({ email, password })">
             <h2>Login</h2>
 
             <InputLabel 

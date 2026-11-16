@@ -1,5 +1,10 @@
 <script setup>
 import Header from './src/components/Header.vue';
+import useUser from './src/composables/useUser.js';
+
+const { getLoggedInUser } = useUser();
+
+getLoggedInUser();
 
 </script>
 <template>

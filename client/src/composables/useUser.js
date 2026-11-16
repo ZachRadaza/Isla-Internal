@@ -1,9 +1,11 @@
-import { readonly, ref } from "vue";
-import { loginUser } from "../services/user";
+import { computed, readonly, ref, shallowReadonly } from "vue";
+import { getCurrentUser, loginUser } from "../services/user";
 
-const user = ref(null);
 const loading = ref(false);
 const error = ref(null);
+
+const user = ref(null);
+const isLoggedIn = computed(() => !!user.value);
 
 async function login({ email, password }){
     loading.value = true;
@@ -14,9 +16,9 @@ async function login({ email, password }){
     }
 
     try{
-        const userL = await loginUser({email, password});
+        user.value = await loginUser({email, password});
         
-        console.log(userL);
+        error.value = null;
     } catch(e){
         console.error('Error in logging in: ', e);
         error.value = e;
@@ -25,11 +27,28 @@ async function login({ email, password }){
     }
 }
 
+async function getLoggedInUser(){
+    loading.value = true;
+
+    try{
+        user.value = await getCurrentUser();
+
+        error.value = false;
+    } catch(e){
+        console.error("Error in getting logged in user: ", e);
+        error.value = e;
+    } finally{
+        loading.value = false;
+    }
+}
+
 export default () => {
     return {
-        user,
+        user: shallowReadonly(user),
+        isLoggedIn: readonly(isLoggedIn),
         loading: readonly(loading),
         error: readonly(error),
-        login
+        login,
+        getLoggedInUser
     };
 }
