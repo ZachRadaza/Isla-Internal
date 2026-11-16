@@ -94,7 +94,8 @@ async function registerUser(req, res, next){
         const addedUserId = await insertUser({ ...user, passwordHash });
         const addedUser = { _id: addedUserId?.insertedId, ...user };
 
-        res.status(201).json({ user: addedUser });
+        //res.status(201).json({ user: addedUser });
+        next();
     } catch(error){
         next(error);
     }
@@ -170,7 +171,7 @@ async function listCurrentUser(req, res, next){
     }
 }
 
-usersRouter.post('/register', requireEmail, requirePassword, extractUserFields, registerUser);
+usersRouter.post('/register', requireEmail, requirePassword, extractUserFields, registerUser, loginUser);
 usersRouter.post('/login', requireEmail, requirePassword, loginUser);
 usersRouter.post('/logout', requireAuth, logoutUser);
 usersRouter.get('/mirror', requireAuth, listCurrentUser);

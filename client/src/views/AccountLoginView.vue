@@ -12,7 +12,7 @@ const password = ref('');
 <template>
 <main>
     <div class="account-box">
-        <form @submit.prevent="login({ email, password })">
+        <form @submit.prevent="login(email, password)">
             <h2>Login</h2>
 
             <InputLabel 
@@ -30,7 +30,7 @@ const password = ref('');
                 required
             />
 
-            <button class="btn-primary">Login</button>
+            <button class="btn-primary" type="submit">Login</button>
 
             <RouterLink to="/register">Don't have an account</RouterLink>
         </form>

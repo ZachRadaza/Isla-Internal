@@ -1,5 +1,5 @@
 import { computed, readonly, ref, shallowReadonly } from "vue";
-import { getCurrentUser, loginUser } from "../services/user";
+import { getCurrentUser, loginUser, logoutUser, registerUser } from "../services/user";
 
 const loading = ref(false);
 const error = ref(null);
@@ -7,7 +7,7 @@ const error = ref(null);
 const user = ref(null);
 const isLoggedIn = computed(() => !!user.value);
 
-async function login({ email, password }){
+async function login(email, password){
     loading.value = true;
 
     if(!email || !password){
@@ -16,8 +16,8 @@ async function login({ email, password }){
     }
 
     try{
-        user.value = await loginUser({email, password});
-        
+        user.value = await loginUser({ email, password });
+
         error.value = null;
     } catch(e){
         console.error('Error in logging in: ', e);
@@ -33,11 +33,44 @@ async function getLoggedInUser(){
     try{
         user.value = await getCurrentUser();
 
-        error.value = false;
     } catch(e){
-        console.error("Error in getting logged in user: ", e);
+        console.warn("No logged in user: ", e);
+    } finally{
+        loading.value = false;
+    }
+}
+
+async function register(email, password, firstName, lastName){
+    loading.value = true;
+
+    if(!email || !password || firstName || lastName){
+        error.value = 'Invalid fields';
+        return;
+    }
+
+    try{
+        user.value = await registerUser({ email, password, firstName, lastName });
+
+        error.value = null;
+    } catch(e){
+        console.error("Error in registering user: ", e);
         error.value = e;
     } finally{
+        loading.value = false;
+    }
+}
+
+async function logout(){
+    loading.value = true;
+
+    try{
+        await logoutUser();
+
+        user.value = null;
+    } catch(e){
+        console.error("Error in logging out user: ", e);
+        error.value = e;
+    }finally{
         loading.value = false;
     }
 }
@@ -49,6 +82,8 @@ export default () => {
         loading: readonly(loading),
         error: readonly(error),
         login,
-        getLoggedInUser
+        getLoggedInUser,
+        logout,
+        register
     };
 }

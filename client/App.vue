@@ -131,7 +131,7 @@ button, .btn{
     cursor: pointer;
 }
 
-.btn:is(:hover, :focus-visible){
+:is(.btn, button):is(:hover, :focus-visible){
     background: var(--color-grey-light);
     border-color: var(--color-grey-dark);
 }
@@ -215,6 +215,6 @@ input[type="checkbox"]:checked:is(:hover, :focus-visible){
     border-radius: var(--border-rd-lg);
     padding: var(--space-6);
     width: 400px;
-    margin: var(--space-7) auto;
+    margin: var(--space-7) auto 0 auto;
 }
 </style>

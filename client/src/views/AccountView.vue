@@ -1,8 +1,18 @@
 <script setup>
+import useUser from '../composables/useUser';
+
+
+const { isLoggedIn, logout } = useUser();
+
 </script>
 <template>
 <main>
-    account
+    <button 
+        v-if="isLoggedIn"
+        @click="logout"
+    >
+        Logout
+    </button>
 </main>
 </template>
 <style scoped>
