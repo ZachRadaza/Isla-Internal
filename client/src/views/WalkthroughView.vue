@@ -1,9 +1,9 @@
 <script setup>
 </script>
 <template>
-    <body>
+    <main>
         walkthrough
-    </body>
+    </main>
 </template>
 <style scoped>
 </style>

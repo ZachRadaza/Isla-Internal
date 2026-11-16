@@ -19,6 +19,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    z-index: 9999;
 }
 
 .isla-header *{

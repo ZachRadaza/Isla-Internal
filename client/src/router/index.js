@@ -5,7 +5,7 @@ import WalkthroughView from "../views/WalkthroughView.vue";
 import ToDoView from "../views/ToDoView.vue";
 import AccountView from "../views/AccountView.vue";
 import AccountLoginView from "../views/AccountLoginView.vue";
-import AccountCreateView from "../views/AccountCreateView.vue";
+import AccountRegisterView from "../views/AccountRegisterView.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -18,11 +18,15 @@ const router = createRouter({
         //account views
         { path: '/account', component: AccountView},
         { path: '/login', component: AccountLoginView},
-        { path: '/createaccount', component: AccountCreateView},
+        { path: '/register', component: AccountRegisterView},
 
         //hidden or to delete
         { path: '/styles', component: StylesView}
     ],
+});
+
+router.beforeEach(() => {
+
 });
 
 export default router;

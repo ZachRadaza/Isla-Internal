@@ -36,8 +36,8 @@ import Header from './src/components/Header.vue';
     --space-3: 0.75rem;
     --space-4: 1rem;
     --space-5: 1.5rem;
-    --space-6: 2rem;
-    --space-7: 3rem;
+    --space-6: 3rem;
+    --space-7: 6rem;
 
     --border-rd-max: 999px;
     --border-rd-sm: 0.25rem;
@@ -153,10 +153,10 @@ button, .btn{
 }
 
 /* input and textarea */
-input, textarea{
+input, textarea, .input{
     all: unset;
     background: var(--color-white);
-    border: var(--border-wd-sm) solid var(--color-black);
+    border: var(--border-wd-lg) solid var(--color-black);
     border-radius: var(--border-rd-md);
     color: var(--color-black);
     font-family: var(--font-body);
@@ -164,6 +164,19 @@ input, textarea{
     padding: var(--space-3);
 }
 
+:is(input, textarea, .input):is(:hover, :focus-visible){
+    border-color: var(--color-grey-dark);
+}
+
+:is(input, textarea, .input):focus,
+.input:has(:focus){
+    border-color: var(--color-blue);
+}
+
+:is(input, textarea, .input):invalid,
+.input:has(:invalid){
+    border-color: var(--color-red);
+}
 /* cheeckbox */
 input[type="checkbox"]{
     width: 20px;
@@ -189,5 +202,14 @@ input[type="checkbox"]:checked{
 
 input[type="checkbox"]:checked:is(:hover, :focus-visible){
     background-color: var(--color-grey-dark);
+}
+
+/* Account Views styles */
+.account-box{
+    border: var(--border-wd-lg) solid var(--color-black);
+    border-radius: var(--border-rd-lg);
+    padding: var(--space-6);
+    width: 400px;
+    margin: var(--space-7) auto;
 }
 </style>
