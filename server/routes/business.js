@@ -7,7 +7,7 @@ import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
 
 const businessRouter = Router();
 
-const requireBusinessId = async (req, res, next) => {
+export const requireBusinessId = async (req, res, next) => {
     const { businessId } = req.params;
 
     if(!isValidString(businessId))

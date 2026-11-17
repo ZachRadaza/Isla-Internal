@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getMongoDb } from "../db/mongo";
+import { getMongoDb } from "../db/mongo.js";
 
 
 const PROPERTIES_COLLECTION = 'properties';

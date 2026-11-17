@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getMongoDb } from "../db/mongo";
+import { getMongoDb } from "../db/mongo.js";
 
 const ROOM_COLLECTION = 'rooms';
 
@@ -22,31 +22,31 @@ export async function getPropertyRooms(propertyId){
         .toArray();
 }
 
-export async function addRoom({ propertyId, name, checklist, createdAt, updatedAt }){
+export async function addRoom({ propertyId, name, checklist }){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .insertOne({
             propertyId: new ObjectId(propertyId),
             name,
             checklist,
-            createdAt,
-            updatedAt,
+            createdAt: new Date(),
+            updatedAt: null,
             deleted: false
         });
 }
 
-export async function addRooms(rooms){
+export async function addRooms(rooms, propertyId){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .bulkWrite(
-            rooms.map(({ propertyId, name, checklist, createdAt, updatedAt }) => ({
+            rooms.map(({ name, checklist }) => ({
                 insertOne: {
                     document: {
                         propertyId: new ObjectId(propertyId),
                         name,
                         checklist,
-                        createdAt,
-                        updatedAt,
+                        createdAt: new Date(),
+                        updatedAt: null,
                         deleted: false
                     }
                 }
