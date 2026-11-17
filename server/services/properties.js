@@ -23,14 +23,6 @@ export async function getBusinessProperties(businessId){
         .toArray();
 }
 
-export async function checkExistingPropertyName(businessId, name){
-    const property = await getMongoDb()
-        .collection(PROPERTIES_COLLECTION)
-        .find({ businessId: new ObjectId(businessId), name, deleted: { $ne: true } });
-
-    return !!property;
-}
-
 export async function addProperty({ businessId, name, address, createdAt, updatedAt }){
     return getMongoDb()
         .collection(PROPERTIES_COLLECTION)

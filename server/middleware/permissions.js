@@ -4,9 +4,9 @@ import { getRole } from "../services/roles.js";
 //update when implementing properties
 async function checkPermission(permItem, userId, businessId){
     const member = await getBusinessMember({ userId, businessId });
-    const role = await getRole(member.roleId); //cache role perms in future
+    const role = await getRole(member?.roleId); //cache role perms in future
 
-    return role.permissions.includes(permItem);
+    return role?.permissions.includes(permItem);
 }
 
 async function permissionsWrapper(permItem, req, res, next){
@@ -20,8 +20,8 @@ async function permissionsWrapper(permItem, req, res, next){
                 message: 'business id required'
             });
 
-        const hasPermissions = checkPermission(permItem, userId, businessId);
-        
+        const hasPermissions = await checkPermission(permItem, userId, businessId);
+
         if(!hasPermissions)
             return res.status(404).json({
                 message: 'you dont have permissions to do such thing bozo'
