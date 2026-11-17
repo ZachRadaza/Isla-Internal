@@ -6,6 +6,7 @@ import ToDoView from "../views/ToDoView.vue";
 import AccountView from "../views/AccountView.vue";
 import AccountLoginView from "../views/AccountLoginView.vue";
 import AccountRegisterView from "../views/AccountRegisterView.vue";
+import useUser from "../composables/useUser.js";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -25,8 +26,13 @@ const router = createRouter({
     ],
 });
 
-router.beforeEach(() => {
+router.beforeEach((to, from) => {
+    if(to.path === '/account'){
+        const { isLoggedIn } = useUser();
 
+        if(!isLoggedIn.value)
+            return { path: '/login' };
+    }
 });
 
 export default router;

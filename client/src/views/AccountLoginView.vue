@@ -2,18 +2,30 @@
 import { ref } from 'vue';
 import InputLabel from '../components/global/InputLabel.vue';
 import useUser from '../composables/useUser.js';
+import LoadingButton from '../components/global/LoadingButton.vue';
+import router from '../router/index.js';
 
-const { login } = useUser();
+const { login, loading, error } = useUser();
 
 const email = ref('');
 const password = ref('');
+
+async function loginUser(){
+    const success = await login(email.value, password.value);
+    password.value = '';
+
+    if(success)
+        router.push({ path: '/' });
+}
 
 </script>
 <template>
 <main>
     <div class="account-box">
-        <form @submit.prevent="login(email, password)">
+        <form @submit.prevent="loginUser">
             <h2>Login</h2>
+
+            <p v-if="error" class="error">{{ error }}</p>
 
             <InputLabel 
                 v-model="email"
@@ -30,7 +42,13 @@ const password = ref('');
                 required
             />
 
-            <button class="btn-primary" type="submit">Login</button>
+            <LoadingButton 
+                class="btn-primary" 
+                type="submit"
+                :loading
+            >
+                Login
+            </LoadingButton>
 
             <RouterLink to="/register">Don't have an account</RouterLink>
         </form>

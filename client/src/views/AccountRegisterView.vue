@@ -2,19 +2,31 @@
 import { ref } from 'vue';
 import useUser from '../composables/useUser';
 import InputLabel from '../components/global/InputLabel.vue';
+import router from '../router/index.js';
+import LoadingButton from '../components/global/LoadingButton.vue';
 
-const { register } = useUser();
+const { register, loading, error } = useUser();
 
 const email = ref('');
 const password = ref('');
 const firstName = ref('');
 const lastName = ref('');
 
+async function registerUser(){
+    const success = await register(email.value, password.value, firstName.value, lastName.value);
+    password.value = '';
+
+    if(success)
+        router.push({path: '/'});
+}
+
 </script>
 <template>
     <div class="account-box">
-        <form @submit.prevent="register(email, password, firstName, lastName)">
+        <form @submit.prevent="registerUser">
             <h2>Register</h2>
+
+            <p v-if="error" class="error">{{ error }}</p>
 
             <InputLabel 
                 v-model="firstName"
@@ -45,7 +57,13 @@ const lastName = ref('');
                 required
             />
 
-            <button class="btn-primary" type="submit">Register</button>
+            <LoadingButton
+                class="btn-primary"
+                type="submit"
+                :loading
+            >
+                Register
+            </LoadingButton>
 
             <RouterLink to="/login">Already have an account</RouterLink>
         </form>

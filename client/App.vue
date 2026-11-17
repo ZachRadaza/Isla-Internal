@@ -82,6 +82,14 @@ h4{ font-size: var(--font-size-md) }
 h5{ font-size:  var(--font-size-sm)}
 h6{ font-size: var(--font-size-xs) }
 
+.error{
+    color: var(--color-red);
+}
+
+.success{
+    color: var(--color-green);
+}
+
 /* tags */
 .tag-green,
 .tag-red,
@@ -136,12 +144,23 @@ button, .btn{
     border-color: var(--color-grey-dark);
 }
 
+:is(.btn, button):disabled{
+    cursor: not-allowed;
+    background: var(--color-grey-light);
+    border-color: var(--color-grey-dark);
+}
+
 .btn-primary{
     background: var(--color-black);
     color: var(--color-white)
 }
 
 .btn-primary:is(:hover, :focus-visible){
+    background: var(--color-grey-dark);
+    border-color: var(--color-grey-dark);
+}
+
+.btn-primary:disabled{
     background: var(--color-grey-dark);
     border-color: var(--color-grey-dark);
 }
@@ -155,6 +174,11 @@ button, .btn{
 .btn-no-bg:is(:hover, :focus-visible){
     color: var(--color-grey-dark);
     opacity: 0.9;
+}
+
+.btn-no-bg:disabled{
+    color: var(--color-grey-dark);
+    opacity: 0.7;
 }
 
 /* input and textarea */
@@ -207,6 +231,16 @@ input[type="checkbox"]:checked{
 
 input[type="checkbox"]:checked:is(:hover, :focus-visible){
     background-color: var(--color-grey-dark);
+}
+
+/* Icons */
+.icon{
+    width: 40px;
+    height: 40px;
+    color: inherit;
+    stroke: inherit;
+    fill: inherit;
+    transition: all 100ms ease;
 }
 
 /* Account Views styles */

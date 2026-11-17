@@ -8,15 +8,14 @@ const user = ref(null);
 const isLoggedIn = computed(() => !!user.value);
 
 async function login(email, password){
-    loading.value = true;
-
     if(!email || !password){
         error.value = 'Email or password in invalid';
         return;
     }
 
+    loading.value = true;
     try{
-        user.value = await loginUser({ email, password });
+        user.value = await loginUser({ email: email.toLowerCase(), password });
 
         error.value = null;
     } catch(e){
@@ -25,6 +24,8 @@ async function login(email, password){
     } finally{
         loading.value = false;
     }
+
+    return !error.value;
 }
 
 async function getLoggedInUser(){
@@ -41,15 +42,14 @@ async function getLoggedInUser(){
 }
 
 async function register(email, password, firstName, lastName){
-    loading.value = true;
-
-    if(!email || !password || firstName || lastName){
+    if(!email || !password || !firstName || !lastName){
         error.value = 'Invalid fields';
         return;
     }
 
+    loading.value = true;
     try{
-        user.value = await registerUser({ email, password, firstName, lastName });
+        user.value = await registerUser({ email: email.toLowerCase(), password, firstName, lastName });
 
         error.value = null;
     } catch(e){
@@ -58,6 +58,7 @@ async function register(email, password, firstName, lastName){
     } finally{
         loading.value = false;
     }
+    return !error.value;
 }
 
 async function logout(){

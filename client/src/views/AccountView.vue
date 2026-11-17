@@ -1,7 +1,6 @@
 <script setup>
 import useUser from '../composables/useUser';
 
-
 const { isLoggedIn, logout } = useUser();
 
 </script>
