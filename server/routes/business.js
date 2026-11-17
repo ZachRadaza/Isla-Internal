@@ -8,7 +8,8 @@ import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
 const businessRouter = Router();
 
 export const requireBusinessId = (req, res, next) => {
-    const { businessId } = req.params;
+    let businessId = req.params?.businessId;
+    businessId ??= req.body?.businessId;
 
     if(!isValidString(businessId))
         return res.status(404).json({

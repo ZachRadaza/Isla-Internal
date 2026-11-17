@@ -3,6 +3,8 @@ import { requireBusinessId } from "./business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
 import { addProperty, deleteProperty, getBusinessProperties, getProperty, updateProperty } from "../services/properties.js";
 import { addRooms, deleteAllPropertyRooms, updateRooms } from "../services/rooms.js";
+import { canAddProperty, canDeleteProperty, canEditProperty, canViewProperty } from "../middleware/permissions.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const propertiesRouter = Router();
 
@@ -117,10 +119,10 @@ async function removeProperty(req, res, next){
     }
 }
 
-propertiesRouter.get('/business/:businessId', requireBusinessId, listBusinessProperties);
-propertiesRouter.post('/', extractPropertyFields, isDuplicateHandler(createProperty));
-propertiesRouter.get('/:propertyId', requirePropertyId, listProperty);
-propertiesRouter.put('/:propertyId', requirePropertyId, isDuplicateHandler(editProperty));
-propertiesRouter.delete('/:propertyId', requirePropertyId, removeProperty);
+propertiesRouter.get('/business/:businessId', requireAuth, requireBusinessId, canViewProperty, listBusinessProperties);
+propertiesRouter.post('/', requireAuth, requireBusinessId, canAddProperty, extractPropertyFields, isDuplicateHandler(createProperty));
+propertiesRouter.get('/:propertyId', requireAuth, requireBusinessId, canViewProperty, requirePropertyId, listProperty);
+propertiesRouter.put('/:propertyId', requireAuth, requireBusinessId, canEditProperty, requirePropertyId, isDuplicateHandler(editProperty));
+propertiesRouter.delete('/:propertyId', requireAuth, requireBusinessId, canDeleteProperty, requirePropertyId, removeProperty);
 
 export default propertiesRouter;

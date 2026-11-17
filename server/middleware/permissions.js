@@ -1,7 +1,6 @@
 import { getBusinessMember } from "../services/business.js";
 import { getRole } from "../services/roles.js";
 
-//update when implementing properties
 async function checkPermission(permItem, userId, businessId){
     const member = await getBusinessMember({ userId, businessId });
     const role = await getRole(member?.roleId); //cache role perms in future
