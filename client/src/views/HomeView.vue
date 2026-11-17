@@ -1,9 +1,9 @@
 <script setup>
 </script>
 <template>
-    <body>
+    <main>
         Home Page
-    </body>
+    </main>
 </template>
 <style scoped>
 </style>

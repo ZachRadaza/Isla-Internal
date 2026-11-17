@@ -1,5 +1,10 @@
 <script setup>
 import Header from './src/components/Header.vue';
+import useUser from './src/composables/useUser.js';
+
+const { getLoggedInUser } = useUser();
+
+getLoggedInUser();
 
 </script>
 <template>
@@ -36,8 +41,8 @@ import Header from './src/components/Header.vue';
     --space-3: 0.75rem;
     --space-4: 1rem;
     --space-5: 1.5rem;
-    --space-6: 2rem;
-    --space-7: 3rem;
+    --space-6: 3rem;
+    --space-7: 6rem;
 
     --border-rd-max: 999px;
     --border-rd-sm: 0.25rem;
@@ -76,6 +81,14 @@ h3{ font-size: var(--font-size-lg) }
 h4{ font-size: var(--font-size-md) }
 h5{ font-size:  var(--font-size-sm)}
 h6{ font-size: var(--font-size-xs) }
+
+.error{
+    color: var(--color-red);
+}
+
+.success{
+    color: var(--color-green);
+}
 
 /* tags */
 .tag-green,
@@ -126,7 +139,13 @@ button, .btn{
     cursor: pointer;
 }
 
-.btn:is(:hover, :focus-visible){
+:is(.btn, button):is(:hover, :focus-visible){
+    background: var(--color-grey-light);
+    border-color: var(--color-grey-dark);
+}
+
+:is(.btn, button):disabled{
+    cursor: not-allowed;
     background: var(--color-grey-light);
     border-color: var(--color-grey-dark);
 }
@@ -137,6 +156,11 @@ button, .btn{
 }
 
 .btn-primary:is(:hover, :focus-visible){
+    background: var(--color-grey-dark);
+    border-color: var(--color-grey-dark);
+}
+
+.btn-primary:disabled{
     background: var(--color-grey-dark);
     border-color: var(--color-grey-dark);
 }
@@ -152,11 +176,16 @@ button, .btn{
     opacity: 0.9;
 }
 
+.btn-no-bg:disabled{
+    color: var(--color-grey-dark);
+    opacity: 0.7;
+}
+
 /* input and textarea */
-input, textarea{
+input, textarea, .input{
     all: unset;
     background: var(--color-white);
-    border: var(--border-wd-sm) solid var(--color-black);
+    border: var(--border-wd-lg) solid var(--color-black);
     border-radius: var(--border-rd-md);
     color: var(--color-black);
     font-family: var(--font-body);
@@ -164,6 +193,19 @@ input, textarea{
     padding: var(--space-3);
 }
 
+:is(input, textarea, .input):is(:hover, :focus-visible){
+    border-color: var(--color-grey-dark);
+}
+
+:is(input, textarea, .input):focus,
+.input:has(:focus){
+    border-color: var(--color-blue);
+}
+
+:is(input, textarea, .input):invalid,
+.input:has(:invalid){
+    border-color: var(--color-red);
+}
 /* cheeckbox */
 input[type="checkbox"]{
     width: 20px;
@@ -189,5 +231,24 @@ input[type="checkbox"]:checked{
 
 input[type="checkbox"]:checked:is(:hover, :focus-visible){
     background-color: var(--color-grey-dark);
+}
+
+/* Icons */
+.icon{
+    width: 40px;
+    height: 40px;
+    color: inherit;
+    stroke: inherit;
+    fill: inherit;
+    transition: all 100ms ease;
+}
+
+/* Account Views styles */
+.account-box{
+    border: var(--border-wd-lg) solid var(--color-black);
+    border-radius: var(--border-rd-lg);
+    padding: var(--space-6);
+    width: 400px;
+    margin: var(--space-7) auto 0 auto;
 }
 </style>
