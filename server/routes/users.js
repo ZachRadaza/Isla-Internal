@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { insertUser, getUserById, getAllUsers, checkExistingUser, getUserByEmail } from "../services/users.js";
+import { insertUser, getUserById, getAllUsers, getUserByEmail } from "../services/users.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { isSecureCookies, requireAuth } from "../middleware/auth.js";
-import { isValidString } from "../services/utils.js";
+import { isDuplicateHandler, isValidString } from "../services/utils.js";
 
 const usersRouter = Router();
 
@@ -79,26 +79,15 @@ async function listUser(req, res, next){
 }
 
 async function registerUser(req, res, next){
-    try{
-        const user = req.user;
+    const user = req.user;
 
-        const userExists = await checkExistingUser(user.email);
+    const passwordHash = await bcrypt.hash(user.password, 12);
 
-        if(userExists)
-            return res.status(404).json({
-                message: 'user already exists'
-            });
+    const addedUserId = await insertUser({ ...user, passwordHash });
+    const addedUser = { _id: addedUserId?.insertedId, ...user };
 
-        const passwordHash = await bcrypt.hash(user.password, 12);
-
-        const addedUserId = await insertUser({ ...user, passwordHash });
-        const addedUser = { _id: addedUserId?.insertedId, ...user };
-
-        //res.status(201).json({ user: addedUser });
-        next();
-    } catch(error){
-        next(error);
-    }
+    //res.status(201).json({ user: addedUser });
+    next();
 }
 
 async function loginUser(req, res, next){
@@ -171,7 +160,7 @@ async function listCurrentUser(req, res, next){
     }
 }
 
-usersRouter.post('/register', requireEmail, requirePassword, extractUserFields, registerUser, loginUser);
+usersRouter.post('/register', requireEmail, requirePassword, extractUserFields, isDuplicateHandler(registerUser), loginUser);
 usersRouter.post('/login', requireEmail, requirePassword, loginUser);
 usersRouter.post('/logout', requireAuth, logoutUser);
 usersRouter.get('/mirror', requireAuth, listCurrentUser);

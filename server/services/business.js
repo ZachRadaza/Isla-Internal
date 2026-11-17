@@ -17,36 +17,20 @@ export async function getBusiness(businessId){
         .findOne({ _id: new ObjectId(businessId) });
 }
 
-export async function checkExistingBusinessByName(name){
-    const business = await getMongoDb()
-        .collection(BUSINESS_COLLECTION)
-        .findOne({ name });
-
-    return !!business
-}
-
-export async function checkExistingBusinessById(businessId){
-    const business = await getMongoDb()
-        .collection(BUSINESS_COLLECTION)
-        .findOne({ _id: new ObjectId(businessId) });
-
-    return !!business;
-}
-
 export async function insertBusiness({ name, createdById, createdAt, updatedAt }){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .insertOne({ name, createdById: new ObjectId(createdById), createdAt, updatedAt });
 }
 
-export async function updateBusiness({ updates, businessId }){
+export async function updateBusiness({ name, businessId }){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .updateOne(
             { _id: new ObjectId(businessId) },
             {
                 $set: {
-                    ...updates,
+                    name,
                     updatedAt: new Date()
                 }
             }
@@ -78,12 +62,6 @@ export async function removeUserFromBusiness({ businessId, userId }){
             userId: new ObjectId(userId), 
             businessId: new ObjectId(businessId) 
         });
-}
-
-export async function checkExistingMember({ businessId, userId }){
-    const member = await getBusinessMember({ businessId, userId });
-
-    return !!member;
 }
 
 export async function getBusinessMember({ businessId, userId }){

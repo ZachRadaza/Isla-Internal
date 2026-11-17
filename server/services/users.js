@@ -30,9 +30,3 @@ export async function insertUser({ email, passwordHash, firstName, lastName, cre
         .collection(USERS_COLLECTION)
         .insertOne({ email, passwordHash, firstName, lastName, createdAt, updatedAt });
 }
-
-export async function checkExistingUser(email){
-    const user = await getUserByEmail(email);
-
-    return !!user;
-}
