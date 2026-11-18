@@ -191,6 +191,7 @@ input, textarea, .input{
     font-family: var(--font-body);
     font-size: var(--font-size-md);
     padding: var(--space-3);
+    cursor: text;
 }
 
 :is(input, textarea, .input):is(:hover, :focus-visible){
