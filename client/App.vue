@@ -60,7 +60,7 @@ html{
     background: var(--color-white);
 }
 
-body{
+body, p{
     padding: 0;
     margin: 0;
 }

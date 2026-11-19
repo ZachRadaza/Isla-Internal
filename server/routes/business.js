@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness } from "../services/business.js";
+import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness } from "../services/business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
 import { getDefaultRoleId, getOwnerRoleId } from "../services/roles.js";
 import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
+import { requireUserId } from "./users.js";
 
 const businessRouter = Router();
 
@@ -124,6 +125,22 @@ async function leaveBusiness(req, res, next){
         next(error);
     }
 }
+
+async function listAllUsersBusiness(req, res, next){
+    try{
+        const { userId } = req.params;
+
+        const business = await getUsersBusiness(userId);
+
+        res.status(200).json({
+            business
+        });
+    } catch(error){
+        next(error);
+    }
+}
+
+businessRouter.get('/memberof/:userId', requireAuth, requireUserId, listAllUsersBusiness)
 
 businessRouter.post('/join/:businessId', requireAuth, requireBusinessId, isDuplicateHandler(joinBusiness));
 businessRouter.post('/leave/:businessId', requireAuth, requireBusinessId, leaveBusiness);

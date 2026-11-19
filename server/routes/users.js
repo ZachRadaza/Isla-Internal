@@ -7,6 +7,17 @@ import { isDuplicateHandler, isValidString } from "../services/utils.js";
 
 const usersRouter = Router();
 
+export const requireUserId = (req, res, next) => {
+    const { userId } = req.params;
+
+    if(!isValidString(userId))
+        return res.status(404).json({
+            error: 'user id required'
+        });
+
+    next();
+}
+
 const requireEmail = (req, res, next) => {
     const email = req.body?.email;
     if(typeof email !== 'string' || !email)
@@ -165,6 +176,6 @@ usersRouter.post('/login', requireEmail, requirePassword, loginUser);
 usersRouter.post('/logout', requireAuth, logoutUser);
 usersRouter.get('/mirror', requireAuth, listCurrentUser);
 usersRouter.get('/', requireAuth, listAllUsers);
-usersRouter.get('/:userid', requireAuth, listUser);
+usersRouter.get('/:userId', requireAuth, requireUserId, listUser);
 
 export default usersRouter;

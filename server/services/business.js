@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getMongoDb } from "../db/mongo.js";
+import { getRoles } from "./roles.js";
 
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
@@ -15,6 +16,15 @@ export async function getBusiness(businessId){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .findOne({ _id: new ObjectId(businessId) });
+}
+
+export async function getBusinesses(businessIds){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .find({
+            _id: { $in: businessIds }
+        })
+        .toArray();
 }
 
 export async function insertBusiness({ name, createdById, createdAt, updatedAt }){
@@ -68,4 +78,40 @@ export async function getBusinessMember({ businessId, userId }){
     return getMongoDb()
         .collection(BUSINESS_MEMBERS_COLLECTION)
         .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
+}
+
+export async function getUsersBusiness(userId){
+    const members = await getMongoDb()
+        .collection(BUSINESS_MEMBERS_COLLECTION)
+        .find({
+            userId: new ObjectId(userId)
+        })
+        .toArray();
+
+    const businessIds = members.map((member) => member.businessId);
+    const roleIds = members.map((member) => member.roleId);
+
+    const [businesses, roles] = await Promise.all([
+        getBusinesses(businessIds),
+        getRoles(roleIds)
+    ]);
+
+    const roleMapped = new Map(
+        roles.map(role => [
+            role._id.toString(),
+            role.name
+        ])
+    );
+
+    const roleByBusinessId = new Map(
+        members.map(member => [
+            member.businessId.toString(),
+            roleMapped.get(member.roleId.toString())
+        ])
+    );
+
+    return businesses.map(business => ({
+        ...business,
+        role: roleByBusinessId.get(business._id.toString())
+    }));
 }

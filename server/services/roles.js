@@ -3,16 +3,24 @@ import { getMongoDb } from "../db/mongo.js";
 
 const ROLES_COLLECTION = 'roles';
 
-export async function getRoles(){
+export async function getAllRoles(){
     return getMongoDb()
         .collection(ROLES_COLLECTION)
-        .find({});
+        .find({})
+        .toArray();
 }
 
 export async function getRole(roleId){
     return getMongoDb()
         .collection(ROLES_COLLECTION)
         .findOne({ _id: new ObjectId(roleId)});
+}
+
+export async function getRoles(roleIds){
+    return getMongoDb()
+        .collection(ROLES_COLLECTION)
+        .find({ _id: { $in: roleIds }})
+        .toArray();
 }
 
 export async function getOwnerRoleId(){

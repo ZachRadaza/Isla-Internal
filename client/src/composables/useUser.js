@@ -1,10 +1,11 @@
-import { computed, readonly, ref, shallowReadonly } from "vue";
+import { computed, readonly, ref } from "vue";
 import { getCurrentUser, loginUser, logoutUser, registerUser } from "../services/user";
 
 const loading = ref(false);
 const error = ref(null);
 
 const user = ref(null);
+const userId = computed(() => user.value?._id ?? null);
 const isLoggedIn = computed(() => !!user.value);
 
 async function login(email, password){
@@ -78,7 +79,8 @@ async function logout(){
 
 export default () => {
     return {
-        user: shallowReadonly(user),
+        user: readonly(user),
+        userId: readonly(userId),
         isLoggedIn: readonly(isLoggedIn),
         loading: readonly(loading),
         error: readonly(error),
