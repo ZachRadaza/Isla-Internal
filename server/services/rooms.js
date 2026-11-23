@@ -63,14 +63,22 @@ export async function updateRoom({ roomId, updates }){
         )
 }
 
-export async function updateRooms(rooms){
+export async function updateRooms({ rooms, propertyId }){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .bulkWrite(
             rooms.map(({ _id, ...updates }) => ({
                 updateOne: {
                     filter: { _id: new ObjectId(_id) },
-                    update: { $set: { ...updates, updatedAt: new Date() } }
+                    update: { 
+                        $set: { ...updates, updatedAt: new Date() },
+                        $setOnInsert: {
+                            deleted: false,
+                            createdAt: new Date(),
+                            propertyId: new ObjectId(propertyId)
+                        }
+                    },
+                    upsert: true
                 }
             }))
         );

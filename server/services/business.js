@@ -4,6 +4,7 @@ import { getRole, getRoles } from "./roles.js";
 
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
+const VERIFIED_EMAILS_COLLECTION = 'business_verified_emails';
 const QA_BUSINESS_NAME = process.env.QA_BUSINESS_NAME;
 
 export async function getAllBusiness(){
@@ -132,4 +133,67 @@ export async function getUsersBusiness(userId){
         ...business,
         role: roleByBusinessId.get(business._id.toString())
     }));
+}
+
+export async function getVerifiedEmails(businessId){
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .find(
+            { businessId: new ObjectId(businessId), used: { $ne: true } },
+            { projection: { used: 0 }}
+        )
+        .toArray();
+}
+
+export async function updateVerifiedEmails({ emails, businessId }){
+    if(!emails)
+        return;
+
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .bulkWrite(
+            emails.map(({ _id, createdAt, updatedAt, used, businessId: incomingBusinessId, ...updates }) => {
+                const id = _id ? new ObjectId(_id) : new ObjectId();
+
+                return {
+                    updateOne: {
+                        filter: { _id: id },
+                        update: { 
+                            $set: { 
+                                ...updates, 
+                                updatedAt: new Date() 
+                            },
+                            $setOnInsert: {
+                                createdAt: new Date(),
+                                used: false,
+                                businessId: new ObjectId(businessId),
+                            } 
+                        },
+                        upsert: true
+                    }
+                }
+            })
+        );
+}
+
+export async function usedVerifiedEmail({ businessId, email }){
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .updateOne(
+            { businessId: new ObjectId(businessId), email},
+            { $set: { used: true}}
+        );
+}
+
+export async function deleteVerifiedEmails({ businessId, emails }){
+    if(!emails)
+        return;
+
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .bulkWrite(
+            emails.map(({ email }) => ({
+                deleteOne: { filter: { businessId: new ObjectId(businessId), email }}
+            }))
+        );
 }

@@ -14,8 +14,10 @@ async function loginUser(){
     const success = await login(email.value, password.value);
     password.value = '';
 
-    if(success)
+    if(success){
         router.push({ path: '/' });
+        window.location.reload();
+    }
 }
 
 </script>

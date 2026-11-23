@@ -5,6 +5,7 @@ const loading = ref(false);
 const error = ref(null);
 
 const user = ref(null);
+const userInitialized = ref(false);
 const userId = computed(() => user.value?._id ?? null);
 const isLoggedIn = computed(() => !!user.value);
 
@@ -83,6 +84,7 @@ export default () => {
         user: readonly(user),
         userId: readonly(userId),
         isLoggedIn: readonly(isLoggedIn),
+        userInitialized,
         loading: readonly(loading),
         error: readonly(error),
         login,

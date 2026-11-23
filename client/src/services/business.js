@@ -13,3 +13,11 @@ export async function getBusinessMember(businessId){
 export async function getQABusinessId(){
     return httpRequest.get(`${BUSINESS_ENDPOINT}/qabusiness/`);
 }
+
+export async function getVerifiedEmails(businessId){
+    return httpRequest.get(`${BUSINESS_ENDPOINT}/verifiedemails/${businessId}`);
+}
+
+export async function updateVerifiedEmails(businessId, { deletedEmails, emails }){
+    return httpRequest.put(`${BUSINESS_ENDPOINT}/verifiedemails/${businessId}`, { deletedEmails, emails });
+}

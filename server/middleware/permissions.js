@@ -2,6 +2,10 @@ import { getBusinessMember } from "../services/business.js";
 
 export async function checkPermission(permItem, userId, businessId){
     const member = await getBusinessMember({ userId, businessId });
+
+    if(!member || !member?.permissions)
+        return false;
+
     return member?.permissions.includes(permItem);
 }
 

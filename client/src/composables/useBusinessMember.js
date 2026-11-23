@@ -25,8 +25,6 @@ async function loadMember(businessId){
     }
 }
 
-
-
 export default () => ({
     member: readonly(member),
     currentBusinessId: readonly(currentBusinessId),

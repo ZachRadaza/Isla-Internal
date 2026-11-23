@@ -1,13 +1,12 @@
 <script setup>
-import { watch } from 'vue';
 import Header from './src/components/Header.vue';
 import useBusiness from './src/composables/useBusiness.js';
 import useUser from './src/composables/useUser.js';
+import useBusinessMember from './src/composables/useBusinessMember.js';
 
-const { getLoggedInUser, userId } = useUser();
-const { loadUsersBusinesses, loadQABusinessId } = useBusiness();
-
-watch(userId, init);
+const { getLoggedInUser, userInitialized } = useUser();
+const { loadUsersBusinesses, loadQABusinessId, userBusinesses } = useBusiness();
+const { loadMember } = useBusinessMember();
 
 async function init(){
     await getLoggedInUser();
@@ -16,6 +15,13 @@ async function init(){
         loadUsersBusinesses(),
         loadQABusinessId()
     ]);
+
+    if(userBusinesses.value.length > 0){
+        const firstBusinessId = userBusinesses.value[0]._id;
+        await loadMember(firstBusinessId);
+    }
+
+    userInitialized.value = true;
 }
 
 init();

@@ -89,7 +89,7 @@ async function editProperty(req, res, next){
 
     const [propertyUpdated, roomsUpdated] = await Promise.all([
         updateProperty({ updates, propertyId }),
-        updateRooms(rooms)
+        updateRooms({ rooms, propertyId })
     ]);
 
     if(propertyUpdated.modifiedCount === 0 || roomsUpdated.modifiedCount === 0)

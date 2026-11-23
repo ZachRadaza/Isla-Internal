@@ -25,6 +25,7 @@ const userInQaBusiness = computed(() =>
         <nav>
             <RouterLink to="/walkthrough">Walkthrough</RouterLink>
             <RouterLink to="/todo">To Do</RouterLink>
+            <RouterLink to="/business">Business</RouterLink>
             <RouterLink to="/account">
                 <template v-if="isLoggedIn">
                     {{ user.firstName }} {{ user.lastName }}

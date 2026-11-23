@@ -7,6 +7,7 @@ import AccountView from "../views/AccountView.vue";
 import AccountLoginView from "../views/AccountLoginView.vue";
 import AccountRegisterView from "../views/AccountRegisterView.vue";
 import useUser from "../composables/useUser.js";
+import BusinessView from "../views/BusinessView.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -20,6 +21,9 @@ const router = createRouter({
         { path: '/account', component: AccountView},
         { path: '/login', component: AccountLoginView},
         { path: '/register', component: AccountRegisterView},
+
+        // business views
+        { path: '/business', component: BusinessView},
 
         //hidden or to delete
         { path: '/styles', component: StylesView}
