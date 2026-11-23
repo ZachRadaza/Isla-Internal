@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getMongoDb } from "../db/mongo.js";
-import { getRoles } from "./roles.js";
+import { getRole, getRoles } from "./roles.js";
 
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
@@ -75,9 +75,17 @@ export async function removeUserFromBusiness({ businessId, userId }){
 }
 
 export async function getBusinessMember({ businessId, userId }){
-    return getMongoDb()
+    const member = await getMongoDb()
         .collection(BUSINESS_MEMBERS_COLLECTION)
         .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
+
+    const role = await getRole(member.roleId);
+    return {
+        _id: member._id,
+        role: role.name,
+        rolePermissions: role.permissions,
+        ...member,
+    };
 }
 
 export async function getUsersBusiness(userId){

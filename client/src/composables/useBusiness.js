@@ -2,9 +2,10 @@ import { readonly, ref } from "vue";
 import { getUserBusinesses } from "../services/business";
 import useUser from "./useUser";
 
-const userBusinesses = ref([]);
 const loading = ref(false);
 const error = ref(null);
+
+const userBusinesses = ref([]);
 
 async function loadUsersBusinesses(){
     loading.value = true;
@@ -18,6 +19,8 @@ async function loadUsersBusinesses(){
     try{
         const { business } = await getUserBusinesses(userId.value);
         userBusinesses.value = business;
+
+        error.value = null;
     } catch(e){
         error.value = e;
     } finally{

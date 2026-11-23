@@ -1,11 +1,9 @@
 import { getBusinessMember } from "../services/business.js";
-import { getRole } from "../services/roles.js";
 
 async function checkPermission(permItem, userId, businessId){
     const member = await getBusinessMember({ userId, businessId });
-    const role = await getRole(member?.roleId); //cache role perms in future
 
-    return role?.permissions.includes(permItem);
+    return member?.permissions.includes(permItem);
 }
 
 async function permissionsWrapper(permItem, req, res, next){
