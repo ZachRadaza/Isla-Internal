@@ -22,7 +22,7 @@ export async function getPropertyRooms(propertyId){
         .toArray();
 }
 
-export async function addRoom({ propertyId, name, checklist }){
+export async function insertRoom({ propertyId, name, checklist }){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .insertOne({
@@ -35,7 +35,7 @@ export async function addRoom({ propertyId, name, checklist }){
         });
 }
 
-export async function addRooms(rooms, propertyId){
+export async function insertRooms(rooms, propertyId){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .bulkWrite(

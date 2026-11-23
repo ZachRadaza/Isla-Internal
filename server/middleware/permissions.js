@@ -37,5 +37,5 @@ export const canInviteMembers = async (req, res, next) => permissionsWrapper('in
 
 export const canViewProperty = async (req, res, next) => permissionsWrapper('view_properties', req, res, next);
 export const canEditProperty = async (req, res, next) => permissionsWrapper('edit_properties', req, res, next);
-export const canAddProperty = async (req, res, next) => permissionsWrapper('add_properties', req, res, next);
+export const caninsertProperty = async (req, res, next) => permissionsWrapper('add_properties', req, res, next);
 export const canDeleteProperty = async (req, res, next) => permissionsWrapper('delete_properties', req, res, next);

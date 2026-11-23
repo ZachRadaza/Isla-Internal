@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { requireBusinessId } from "./business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
-import { addProperty, deleteProperty, getBusinessProperties, getProperty, updateProperty } from "../services/properties.js";
-import { addRooms, deleteAllPropertyRooms, updateRooms } from "../services/rooms.js";
-import { canAddProperty, canDeleteProperty, canEditProperty, canViewProperty } from "../middleware/permissions.js";
+import { insertProperty, deleteProperty, getBusinessProperties, getProperty, updateProperty } from "../services/properties.js";
+import { insertRooms, deleteAllPropertyRooms, updateRooms } from "../services/rooms.js";
+import { caninsertProperty, canDeleteProperty, canEditProperty, canViewProperty } from "../middleware/permissions.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const propertiesRouter = Router();
@@ -69,10 +69,10 @@ async function listProperty(req, res, next){
 }
 
 async function createProperty(req, res, next){
-    const { _id } = await addProperty(req.property);
+    const { _id } = await insertProperty(req.property);
     const addedProperty = { _id, ...req.property };
 
-    const { insertedIds } = await addRooms(req.rooms, _id);
+    const { insertedIds } = await insertRooms(req.rooms, _id);
 
     const rooms = Object.values(insertedIds).map((id, i) => ({ ...req.rooms[i], _id: id }));
     
@@ -120,7 +120,7 @@ async function removeProperty(req, res, next){
 }
 
 propertiesRouter.get('/business/:businessId', requireAuth, requireBusinessId, canViewProperty, listBusinessProperties);
-propertiesRouter.post('/', requireAuth, requireBusinessId, canAddProperty, extractPropertyFields, isDuplicateHandler(createProperty));
+propertiesRouter.post('/', requireAuth, requireBusinessId, caninsertProperty, extractPropertyFields, isDuplicateHandler(createProperty));
 propertiesRouter.get('/:propertyId', requireAuth, requireBusinessId, canViewProperty, requirePropertyId, listProperty);
 propertiesRouter.put('/:propertyId', requireAuth, requireBusinessId, canEditProperty, requirePropertyId, isDuplicateHandler(editProperty));
 propertiesRouter.delete('/:propertyId', requireAuth, requireBusinessId, canDeleteProperty, requirePropertyId, removeProperty);
