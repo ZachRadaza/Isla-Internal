@@ -1,11 +1,12 @@
 import { readonly, ref } from "vue";
-import { getUserBusinesses } from "../services/business";
+import { getQABusinessId, getUserBusinesses } from "../services/business";
 import useUser from "./useUser";
 
 const loading = ref(false);
 const error = ref(null);
 
 const userBusinesses = ref([]);
+const qaBusinessId = ref(null);
 
 async function loadUsersBusinesses(){
     loading.value = true;
@@ -28,9 +29,20 @@ async function loadUsersBusinesses(){
     }
 }
 
+async function loadQABusinessId(){
+    try{
+        const { businessId } = await getQABusinessId();
+        qaBusinessId.value = businessId;
+    } catch(error){
+        console.warn('Error loading QA Business');
+    }
+}
+
 export default () => ({
     userBusinesses: readonly(userBusinesses),
+    qaBusinessId: readonly(qaBusinessId),
     loading: readonly(loading),
     error: readonly(error),
     loadUsersBusinesses,
+    loadQABusinessId
 });

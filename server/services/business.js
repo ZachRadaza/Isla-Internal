@@ -4,6 +4,7 @@ import { getRole, getRoles } from "./roles.js";
 
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
+const QA_BUSINESS_NAME = process.env.QA_BUSINESS_NAME;
 
 export async function getAllBusiness(){
     return getMongoDb()
@@ -25,6 +26,15 @@ export async function getBusinesses(businessIds){
             _id: { $in: businessIds }
         })
         .toArray();
+}
+
+export async function getQABusinessId(){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .findOne(
+            { name: QA_BUSINESS_NAME },
+            { projection: { name: 0, createdAt: 0, updatedAt: 0, createdById: 0 } }
+        );
 }
 
 export async function insertBusiness({ name, createdById, createdAt, updatedAt }){
@@ -83,7 +93,7 @@ export async function getBusinessMember({ businessId, userId }){
     return {
         _id: member._id,
         role: role.name,
-        rolePermissions: role.permissions,
+        permissions: role.permissions,
         ...member,
     };
 }

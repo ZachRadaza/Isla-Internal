@@ -1,10 +1,24 @@
 <script setup>
+import { watch } from 'vue';
 import Header from './src/components/Header.vue';
+import useBusiness from './src/composables/useBusiness.js';
 import useUser from './src/composables/useUser.js';
 
-const { getLoggedInUser } = useUser();
+const { getLoggedInUser, userId } = useUser();
+const { loadUsersBusinesses, loadQABusinessId } = useBusiness();
 
-getLoggedInUser();
+watch(userId, init);
+
+async function init(){
+    await getLoggedInUser();
+
+    await Promise.all([
+        loadUsersBusinesses(),
+        loadQABusinessId()
+    ]);
+}
+
+init();
 
 </script>
 <template>

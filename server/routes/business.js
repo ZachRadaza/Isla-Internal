@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness, getBusinessMember } from "../services/business.js";
+import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness, getBusinessMember, getQABusinessId } from "../services/business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
 import { getDefaultRoleId, getOwnerRoleId } from "../services/roles.js";
-import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
+import { canEditBusiness, canViewBusiness, checkPermission } from "../middleware/permissions.js";
 import { requireUserId } from "./users.js";
 
 const businessRouter = Router();
@@ -58,6 +58,26 @@ async function listBusiness(req, res, next){
         const business = await getBusiness(businessId);
 
         res.json({ business });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function listQABusinessId(req, res, next){
+    try{
+        const { userId } = req.authUser;
+
+        const business = await getQABusinessId();
+        const canView = checkPermission('view_business', userId, business._id);
+
+        if(!canView)
+            return res.status(404).json({
+                message: 'you dont have permissions to do such thing bozo'
+            });
+
+        res.status(200).json({
+            businessId: business._id
+        });
     } catch(error){
         next(error);
     }
@@ -160,6 +180,8 @@ businessRouter.get('/memberinfo/:businessId', requireAuth, requireBusinessId, li
 
 businessRouter.post('/join/:businessId', requireAuth, requireBusinessId, isDuplicateHandler(joinBusiness));
 businessRouter.post('/leave/:businessId', requireAuth, requireBusinessId, leaveBusiness);
+
+businessRouter.get('/qabusiness/', requireAuth, listQABusinessId);
 
 businessRouter.post('/', requireAuth, requireBusinessName, extractBusinessFields, isDuplicateHandler(createBusiness));
 //businessRouter.get('/', requireAuth, listAllBusiness);

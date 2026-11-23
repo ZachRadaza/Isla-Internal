@@ -9,3 +9,7 @@ export async function getUserBusinesses(userId){
 export async function getBusinessMember(businessId){
     return httpRequest.get(`${BUSINESS_ENDPOINT}/memberinfo/${businessId}`);
 }
+
+export async function getQABusinessId(){
+    return httpRequest.get(`${BUSINESS_ENDPOINT}/qabusiness/`);
+}

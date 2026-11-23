@@ -1,15 +1,26 @@
 <script setup>
+import { computed } from 'vue';
+import useBusiness from '../composables/useBusiness.js';
+import useBusinessMember from '../composables/useBusinessMember.js';
 import useUser from '../composables/useUser';
 import IslaVillaIcon from './icons/IslaVillaIcon.vue';
 
 const { user, isLoggedIn } = useUser();
+const { qaBusinessId } = useBusiness();
+const { currentBusinessId } = useBusinessMember();
+
+const userInQaBusiness = computed(() => 
+    qaBusinessId.value === currentBusinessId.value &&
+    qaBusinessId.value && currentBusinessId.value
+);
 
 </script>
 <template>
-    <header class="isla-header">
+    <header class="isla-header" :class="{ 'in-qa': userInQaBusiness }">
         <RouterLink to="/" id="isla-header-home">
             <IslaVillaIcon />
             Isla Villa Internal
+            <template v-if="userInQaBusiness">QA</template>
         </RouterLink>
         <nav>
             <RouterLink to="/walkthrough">Walkthrough</RouterLink>
@@ -37,6 +48,10 @@ const { user, isLoggedIn } = useUser();
     justify-content: space-between;
     align-items: center;
     z-index: 9999;
+}
+
+.isla-header.in-qa{
+    background: var(--color-blue);
 }
 
 .isla-header *{

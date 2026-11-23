@@ -5,10 +5,8 @@ import useBusinessMember from '../composables/useBusinessMember.js';
 import useUser from '../composables/useUser';
 
 const { isLoggedIn, logout, user } = useUser();
-const { userBusinesses, loadUsersBusinesses } = useBusiness();
+const { userBusinesses } = useBusiness();
 const { loadMember, member } = useBusinessMember();
-
-loadUsersBusinesses();
 
 </script>
 <template>

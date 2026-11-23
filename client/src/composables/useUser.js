@@ -69,6 +69,7 @@ async function logout(){
         await logoutUser();
 
         user.value = null;
+        window.location.reload();
     } catch(e){
         console.error("Error in logging out user: ", e);
         error.value = e;
