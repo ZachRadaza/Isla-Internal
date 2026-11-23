@@ -1,12 +1,17 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { getVerifiedEmails, updateVerifiedEmails } from '../services/business';
 import useBusinessMember from '../composables/useBusinessMember';
 import useUser from '../composables/useUser';
 import LoadingButton from '../components/global/LoadingButton.vue';
+import LoadingOverlay from '../components/global/LoadingOverlay.vue';
+import useBusiness from '../composables/useBusiness.js';
 
 const { currentBusinessId } = useBusinessMember();
+const { userBusinesses } = useBusiness();
 const { userInitialized } = useUser();
+
+const currentBusiness = computed(() => userBusinesses.value.find((business) => business._id === currentBusinessId));
 
 const verifiedEmails = ref([]);
 const verifiedEmailsDisplayed = ref([]);
@@ -89,6 +94,14 @@ function cancelVerifiedEmails(){
 </script>
 <template>
     <main>
+        <h2>Business Info</h2>
+
+        <!-- bidness info-->
+        <div>
+            <!-- To Do-->
+        </div>
+
+        <!-- Verified Emails -->
         <div class="business__verified-emails">
             <!-- Verified Emails header-->
             <div class="business__verified-emails-header">
@@ -117,6 +130,7 @@ function cancelVerifiedEmails(){
 
             <!-- Verified Email list-->
             <ol class="business__verified-emails-list">
+                <LoadingOverlay :loading />
                 <div v-if="verifiedEmailsDisplayed.length === 0 && !isVerifiedEmailsEditing">
                     No Current Verified Emails
                 </div>
@@ -158,6 +172,7 @@ main{
     display: flex;
     flex-direction: column;
     padding: var(--space-6);
+    gap: var(--space-4);
 }
 
 .business__verified-emails{
@@ -184,6 +199,7 @@ main{
 
 .business__verified-email{
     margin: var(--space-2) 0;
+    width: 100%;
 }
 
 .business__verified-email input{
@@ -193,6 +209,10 @@ main{
 
 .business__verified-email input:disabled{
     border-color: transparent;
+}
+
+.business__verified-email button{
+    float: right;
 }
 
 </style>

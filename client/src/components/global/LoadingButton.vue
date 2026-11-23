@@ -27,8 +27,8 @@ defineProps({
 }
 
 @keyframes spin {
-  from { transform: rotate(0turn); }
-  to   { transform: rotate(1turn); }
+    from { transform: rotate(0turn); }
+    to   { transform: rotate(1turn); }
 }
 
 .btn-primary .loading-icon{
