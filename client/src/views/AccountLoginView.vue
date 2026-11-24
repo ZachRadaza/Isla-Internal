@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import InputLabel from '../components/global/InputLabel.vue';
 import useUser from '../composables/useUser.js';
 import LoadingButton from '../components/global/LoadingButton.vue';
-import router from '../router/index.js';
 
 const { login, loading, error } = useUser();
 
@@ -15,7 +14,7 @@ async function loginUser(){
     password.value = '';
 
     if(success)
-        router.push({ path: '/' });
+        window.location.href = '/';
 }
 
 </script>

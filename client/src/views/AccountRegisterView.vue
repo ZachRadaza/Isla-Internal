@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import useUser from '../composables/useUser';
 import InputLabel from '../components/global/InputLabel.vue';
-import router from '../router/index.js';
 import LoadingButton from '../components/global/LoadingButton.vue';
 
 const { register, loading, error } = useUser();
@@ -14,10 +13,11 @@ const lastName = ref('');
 
 async function registerUser(){
     const success = await register(email.value, password.value, firstName.value, lastName.value);
+
     password.value = '';
 
     if(success)
-        router.push({path: '/'});
+        window.location.href = '/';
 }
 
 </script>

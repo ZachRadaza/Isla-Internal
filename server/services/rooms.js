@@ -22,7 +22,7 @@ export async function getPropertyRooms(propertyId){
         .toArray();
 }
 
-export async function addRoom({ propertyId, name, checklist }){
+export async function insertRoom({ propertyId, name, checklist }){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .insertOne({
@@ -35,7 +35,7 @@ export async function addRoom({ propertyId, name, checklist }){
         });
 }
 
-export async function addRooms(rooms, propertyId){
+export async function insertRooms(rooms, propertyId){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .bulkWrite(
@@ -63,14 +63,22 @@ export async function updateRoom({ roomId, updates }){
         )
 }
 
-export async function updateRooms(rooms){
+export async function updateRooms({ rooms, propertyId }){
     return getMongoDb()
         .collection(ROOM_COLLECTION)
         .bulkWrite(
             rooms.map(({ _id, ...updates }) => ({
                 updateOne: {
                     filter: { _id: new ObjectId(_id) },
-                    update: { $set: { ...updates, updatedAt: new Date() } }
+                    update: { 
+                        $set: { ...updates, updatedAt: new Date() },
+                        $setOnInsert: {
+                            deleted: false,
+                            createdAt: new Date(),
+                            propertyId: new ObjectId(propertyId)
+                        }
+                    },
+                    upsert: true
                 }
             }))
         );

@@ -1,8 +1,12 @@
 import { ObjectId } from "mongodb";
 import { getMongoDb } from "../db/mongo.js";
+import { getRole, getRoles } from "./roles.js";
 
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
+const VERIFIED_EMAILS_COLLECTION = 'business_verified_emails';
+const BUSINESS_NAME_QA = process.env.BUSINESS_NAME_QA;
+const BUSINESS_NAME_ISLA = process.env.BUSINESS_NAME_ISLA;
 
 export async function getAllBusiness(){
     return getMongoDb()
@@ -15,6 +19,33 @@ export async function getBusiness(businessId){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .findOne({ _id: new ObjectId(businessId) });
+}
+
+export async function getBusinesses(businessIds){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .find({
+            _id: { $in: businessIds }
+        })
+        .toArray();
+}
+
+export async function getQABusinessId(){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .findOne(
+            { name: BUSINESS_NAME_QA },
+            { projection: { name: 0, createdAt: 0, updatedAt: 0, createdById: 0 } }
+        );
+}
+
+export async function getIslaBusinessId(){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .findOne(
+            { name: BUSINESS_NAME_ISLA },
+            { projection: { name: 0, createdAt: 0, updatedAt: 0, createdById: 0 }}
+        );
 }
 
 export async function insertBusiness({ name, createdById, createdAt, updatedAt }){
@@ -65,7 +96,122 @@ export async function removeUserFromBusiness({ businessId, userId }){
 }
 
 export async function getBusinessMember({ businessId, userId }){
-    return getMongoDb()
+    const member = await getMongoDb()
         .collection(BUSINESS_MEMBERS_COLLECTION)
         .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
+
+    const role = await getRole(member?.roleId);
+    return {
+        _id: member?._id,
+        role: role?.name,
+        permissions: role?.permissions,
+        ...member,
+    };
+}
+
+export async function getUsersBusiness(userId){
+    const members = await getMongoDb()
+        .collection(BUSINESS_MEMBERS_COLLECTION)
+        .find({
+            userId: new ObjectId(userId)
+        })
+        .toArray();
+
+    const businessIds = members.map((member) => member.businessId);
+    const roleIds = members.map((member) => member.roleId);
+
+    const [businesses, roles] = await Promise.all([
+        getBusinesses(businessIds),
+        getRoles(roleIds)
+    ]);
+
+    const roleMapped = new Map(
+        roles.map(role => [
+            role._id.toString(),
+            role.name
+        ])
+    );
+
+    const roleByBusinessId = new Map(
+        members.map(member => [
+            member.businessId.toString(),
+            roleMapped.get(member.roleId.toString())
+        ])
+    );
+
+    return businesses.map(business => ({
+        ...business,
+        role: roleByBusinessId.get(business._id.toString())
+    }));
+}
+
+export async function getVerifiedEmails(businessId){
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .find(
+            { businessId: new ObjectId(businessId), used: { $ne: true } },
+            { projection: { used: 0 }}
+        )
+        .toArray();
+}
+
+export async function updateVerifiedEmails({ emails, businessId }){
+    if(!emails || emails?.length === 0)
+        return;
+
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .bulkWrite(
+            emails.map(({ _id, createdAt, updatedAt, used, businessId: incomingBusinessId, ...updates }) => {
+                const id = _id ? new ObjectId(_id) : new ObjectId();
+
+                return {
+                    updateOne: {
+                        filter: { _id: id },
+                        update: { 
+                            $set: { 
+                                ...updates, 
+                                updatedAt: new Date() 
+                            },
+                            $setOnInsert: {
+                                createdAt: new Date(),
+                                used: false,
+                                businessId: new ObjectId(businessId),
+                            } 
+                        },
+                        upsert: true
+                    }
+                }
+            })
+        );
+}
+
+export async function usedVerifiedEmail({ businessId, email }){
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .updateOne(
+            { businessId: new ObjectId(businessId), email},
+            { $set: { used: true}}
+        );
+}
+
+export async function deleteVerifiedEmails({ businessId, emails }){
+    if(!emails || emails?.length === 0)
+        return;
+
+    return getMongoDb()
+        .collection(VERIFIED_EMAILS_COLLECTION)
+        .bulkWrite(
+            emails.map(({ email }) => ({
+                deleteOne: { filter: { businessId: new ObjectId(businessId), email }}
+            }))
+        );
+}
+
+export async function verifyBusinessEmail({ businessId, email}){
+    const validEmailsObj = await getVerifiedEmails(businessId);
+    const validEmails = validEmailsObj.map((emailObj) => emailObj.email);
+    const isValid = validEmails.includes(email);
+
+    return isValid
 }

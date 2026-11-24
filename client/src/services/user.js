@@ -1,63 +1,30 @@
-const USER_ENDPOINT = `/api/users`;
+import { httpRequest } from "../utils/http";
+
+const USER_ENDPOINT = `/users`;
 
 export async function loginUser({ email, password }){
-    const response = await fetch(`${USER_ENDPOINT}/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-
-    if(!response.ok)
-        throw data.message;
+    await httpRequest.post(`${USER_ENDPOINT}/login`, { email, password });
 
     return getCurrentUser();
 }
 
 export async function registerUser({ email, password, firstName, lastName }){
-    const response = await fetch(`${USER_ENDPOINT}/register`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName })
-    });
-
-    const data = await response.json();
-
-    if(!response.ok)
-        throw data.message;
+    await httpRequest.post(`${USER_ENDPOINT}/register`, { email, password, firstName, lastName });
 
     return getCurrentUser();
 }
 
 export async function logoutUser(){
-    const response = await fetch(`${USER_ENDPOINT}/logout`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await response.json();
-
-    if(!response.ok)
-        throw new Error(data.message);
+    const data = await httpRequest.post(
+        `${USER_ENDPOINT}/logout`,
+        null
+    );
 
     return data;
 }
 
 export async function getCurrentUser(){
-    const response = await fetch(`${USER_ENDPOINT}/mirror`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await response.json();
-
-    if(!response.ok)
-        throw new Error(data.message);
+    const data = await httpRequest.get(`${USER_ENDPOINT}/mirror`);
 
     return data;
 }

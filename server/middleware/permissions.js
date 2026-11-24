@@ -1,11 +1,12 @@
 import { getBusinessMember } from "../services/business.js";
-import { getRole } from "../services/roles.js";
 
-async function checkPermission(permItem, userId, businessId){
+export async function checkPermission(permItem, userId, businessId){
     const member = await getBusinessMember({ userId, businessId });
-    const role = await getRole(member?.roleId); //cache role perms in future
 
-    return role?.permissions.includes(permItem);
+    if(!member || !member?.permissions)
+        return false;
+
+    return member?.permissions.includes(permItem);
 }
 
 async function permissionsWrapper(permItem, req, res, next){
@@ -22,7 +23,7 @@ async function permissionsWrapper(permItem, req, res, next){
         const hasPermissions = await checkPermission(permItem, userId, businessId);
 
         if(!hasPermissions)
-            return res.status(404).json({
+            return res.status(401).json({
                 message: 'you dont have permissions to do such thing bozo'
             });
         next();
@@ -40,5 +41,5 @@ export const canInviteMembers = async (req, res, next) => permissionsWrapper('in
 
 export const canViewProperty = async (req, res, next) => permissionsWrapper('view_properties', req, res, next);
 export const canEditProperty = async (req, res, next) => permissionsWrapper('edit_properties', req, res, next);
-export const canAddProperty = async (req, res, next) => permissionsWrapper('add_properties', req, res, next);
+export const caninsertProperty = async (req, res, next) => permissionsWrapper('add_properties', req, res, next);
 export const canDeleteProperty = async (req, res, next) => permissionsWrapper('delete_properties', req, res, next);

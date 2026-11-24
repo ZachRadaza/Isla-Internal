@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness } from "../services/business.js";
+import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness, getBusinessMember, getQABusinessId, usedVerifiedEmail, getVerifiedEmails, updateVerifiedEmails, deleteVerifiedEmails, verifyBusinessEmail } from "../services/business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
 import { getDefaultRoleId, getOwnerRoleId } from "../services/roles.js";
-import { canEditBusiness, canViewBusiness } from "../middleware/permissions.js";
+import { canEditBusiness, canInviteMembers, canViewBusiness, checkPermission } from "../middleware/permissions.js";
+import { requireUserId } from "./users.js";
 
 const businessRouter = Router();
 
@@ -28,6 +29,24 @@ const requireBusinessName = (req, res, next) => {
         });
 
     next();
+}
+
+const requireVerifiedEmail = async (req, res, next) => {
+    try{
+        const { businessId } = req.params;
+        const { email } = req.authUser;
+
+        const isValid = await verifyBusinessEmail({ businessId, email });
+
+        if(!isValid)
+            return res.stats(404).json({
+                message: 'You are not authorized to join this Business'
+            });
+
+        next();
+    }catch(error){
+        next(error);
+    }
 }
 
 const extractBusinessFields = (req, res, next) => {
@@ -57,6 +76,26 @@ async function listBusiness(req, res, next){
         const business = await getBusiness(businessId);
 
         res.json({ business });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function listQABusinessId(req, res, next){
+    try{
+        const { userId } = req.authUser;
+
+        const business = await getQABusinessId();
+        const canView = checkPermission('view_business', userId, business._id);
+
+        if(!canView)
+            return res.status(404).json({
+                message: 'you dont have permissions to do such thing bozo'
+            });
+
+        res.status(200).json({
+            businessId: business._id
+        });
     } catch(error){
         next(error);
     }
@@ -94,7 +133,7 @@ async function editBusiness(req, res, next){
 
 async function joinBusiness(req, res, next){
     const { businessId } = req.params;
-    const { userId } = req.authUser;
+    const { userId, email } = req.authUser;
     const defaultRole = await getDefaultRoleId();
 
     const businessMember = await addUserToBusiness({
@@ -104,6 +143,8 @@ async function joinBusiness(req, res, next){
         createdAt: new Date(),
         updatedAt: null
     });
+
+    await usedVerifiedEmail({ businessId, email });
 
     res.status(201).json({
         businessMember
@@ -115,7 +156,10 @@ async function leaveBusiness(req, res, next){
         const { businessId } = req.params;
         const { userId } = req.authUser;
 
-        await removeUserFromBusiness({ businessId, userId });
+        await Promise.all([
+            removeUserFromBusiness({ businessId, userId }),
+            deleteVerifiedEmail({ businessId, email })
+        ]);
 
         res.status(204).json({
             message: 'succesfully removed user from business'
@@ -125,8 +169,80 @@ async function leaveBusiness(req, res, next){
     }
 }
 
-businessRouter.post('/join/:businessId', requireAuth, requireBusinessId, isDuplicateHandler(joinBusiness));
+async function listAllUsersBusiness(req, res, next){
+    try{
+        const { userId } = req.params;
+
+        const business = await getUsersBusiness(userId);
+
+        res.status(200).json({
+            business
+        });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function listBusinessMember(req, res, next){
+    try{
+        const { userId } = req.authUser;
+        const { businessId } = req.params;
+
+        const businessMember = await getBusinessMember({ businessId, userId }); 
+
+        res.status(200).json({
+            businessMember
+        });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function listVerifiedEmails(req, res, next){
+    try{
+        const { businessId } = req.params;
+
+        const verifiedEmails = await getVerifiedEmails(businessId);
+
+        res.status(200).json({
+            verifiedEmails
+        });
+    } catch(error){
+        next(error);
+    }
+}
+
+async function editVerifiedEmails(req, res, next){
+    try{
+        const { businessId } = req.params;
+        const { deletedEmails, emails } = req.body;
+
+        const [editedEmails, removedEmails] = await Promise.all([
+            updateVerifiedEmails({ emails, businessId }),
+            deleteVerifiedEmails({ businessId, emails: deletedEmails })
+        ]);
+
+        if(editedEmails?.modifiedCount === 0 || removedEmails?.deletedCount === 0)
+            return res.status(404).json({
+                message: 'nothing was updated'
+            });
+
+        res.status(204).json(req.body);
+    } catch(error){
+        next(error);
+    }
+}
+
+businessRouter.get('/memberof/:userId', requireAuth, requireUserId, listAllUsersBusiness);
+businessRouter.get('/memberinfo/:businessId', requireAuth, requireBusinessId, listBusinessMember);
+
+businessRouter.get('/verifiedemails/:businessId', requireAuth, requireBusinessId, canInviteMembers, listVerifiedEmails);
+businessRouter.put('/verifiedemails/:businessId', requireAuth, requireBusinessId, canInviteMembers, editVerifiedEmails);
+
+businessRouter.post('/join/:businessId', requireAuth, requireBusinessId, requireVerifiedEmail, isDuplicateHandler(joinBusiness));
 businessRouter.post('/leave/:businessId', requireAuth, requireBusinessId, leaveBusiness);
+
+businessRouter.get('/qabusiness/', requireAuth, listQABusinessId);
 
 businessRouter.post('/', requireAuth, requireBusinessName, extractBusinessFields, isDuplicateHandler(createBusiness));
 //businessRouter.get('/', requireAuth, listAllBusiness);

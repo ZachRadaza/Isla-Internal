@@ -23,7 +23,7 @@ export async function getBusinessProperties(businessId){
         .toArray();
 }
 
-export async function addProperty({ businessId, name, address, createdAt, updatedAt }){
+export async function insertProperty({ businessId, name, address, createdAt, updatedAt }){
     return getMongoDb()
         .collection(PROPERTIES_COLLECTION)
         .insertOne({

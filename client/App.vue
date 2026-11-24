@@ -1,10 +1,30 @@
 <script setup>
 import Header from './src/components/Header.vue';
+import useBusiness from './src/composables/useBusiness.js';
 import useUser from './src/composables/useUser.js';
+import useBusinessMember from './src/composables/useBusinessMember.js';
 
-const { getLoggedInUser } = useUser();
+const { getLoggedInUser, userInitialized } = useUser();
+const { loadUsersBusinesses, loadQABusinessId, userBusinesses } = useBusiness();
+const { loadMember } = useBusinessMember();
 
-getLoggedInUser();
+async function init(){
+    await getLoggedInUser();
+
+    await Promise.all([
+        loadUsersBusinesses(),
+        loadQABusinessId()
+    ]);
+
+    if(userBusinesses.value.length > 0){
+        const firstBusinessId = userBusinesses.value[0]._id;
+        await loadMember(firstBusinessId);
+    }
+
+    userInitialized.value = true;
+}
+
+init();
 
 </script>
 <template>
@@ -60,7 +80,7 @@ html{
     background: var(--color-white);
 }
 
-body{
+body, p{
     padding: 0;
     margin: 0;
 }
@@ -191,6 +211,7 @@ input, textarea, .input{
     font-family: var(--font-body);
     font-size: var(--font-size-md);
     padding: var(--space-3);
+    cursor: text;
 }
 
 :is(input, textarea, .input):is(:hover, :focus-visible){
