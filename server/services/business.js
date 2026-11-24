@@ -5,7 +5,8 @@ import { getRole, getRoles } from "./roles.js";
 const BUSINESS_COLLECTION = 'business';
 const BUSINESS_MEMBERS_COLLECTION = 'business_members';
 const VERIFIED_EMAILS_COLLECTION = 'business_verified_emails';
-const QA_BUSINESS_NAME = process.env.QA_BUSINESS_NAME;
+const BUSINESS_NAME_QA = process.env.BUSINESS_NAME_QA;
+const BUSINESS_NAME_ISLA = process.env.BUSINESS_NAME_ISLA;
 
 export async function getAllBusiness(){
     return getMongoDb()
@@ -33,8 +34,17 @@ export async function getQABusinessId(){
     return getMongoDb()
         .collection(BUSINESS_COLLECTION)
         .findOne(
-            { name: QA_BUSINESS_NAME },
+            { name: BUSINESS_NAME_QA },
             { projection: { name: 0, createdAt: 0, updatedAt: 0, createdById: 0 } }
+        );
+}
+
+export async function getIslaBusinessId(){
+    return getMongoDb()
+        .collection(BUSINESS_COLLECTION)
+        .findOne(
+            { name: BUSINESS_NAME_ISLA },
+            { projection: { name: 0, createdAt: 0, updatedAt: 0, createdById: 0 }}
         );
 }
 
@@ -90,11 +100,11 @@ export async function getBusinessMember({ businessId, userId }){
         .collection(BUSINESS_MEMBERS_COLLECTION)
         .findOne({ userId: new ObjectId(userId), businessId: new ObjectId(businessId) });
 
-    const role = await getRole(member.roleId);
+    const role = await getRole(member?.roleId);
     return {
-        _id: member._id,
-        role: role.name,
-        permissions: role.permissions,
+        _id: member?._id,
+        role: role?.name,
+        permissions: role?.permissions,
         ...member,
     };
 }
@@ -146,7 +156,7 @@ export async function getVerifiedEmails(businessId){
 }
 
 export async function updateVerifiedEmails({ emails, businessId }){
-    if(!emails)
+    if(!emails || emails?.length === 0)
         return;
 
     return getMongoDb()
@@ -186,7 +196,7 @@ export async function usedVerifiedEmail({ businessId, email }){
 }
 
 export async function deleteVerifiedEmails({ businessId, emails }){
-    if(!emails)
+    if(!emails || emails?.length === 0)
         return;
 
     return getMongoDb()
@@ -196,4 +206,12 @@ export async function deleteVerifiedEmails({ businessId, emails }){
                 deleteOne: { filter: { businessId: new ObjectId(businessId), email }}
             }))
         );
+}
+
+export async function verifyBusinessEmail({ businessId, email}){
+    const validEmailsObj = await getVerifiedEmails(businessId);
+    const validEmails = validEmailsObj.map((emailObj) => emailObj.email);
+    const isValid = validEmails.includes(email);
+
+    return isValid
 }

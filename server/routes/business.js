@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness, getBusinessMember, getQABusinessId, usedVerifiedEmail, getVerifiedEmails, updateVerifiedEmails, deleteVerifiedEmails } from "../services/business.js";
+import { insertBusiness, getAllBusiness, getBusiness, updateBusiness, addUserToBusiness, removeUserFromBusiness, getUsersBusiness, getBusinessMember, getQABusinessId, usedVerifiedEmail, getVerifiedEmails, updateVerifiedEmails, deleteVerifiedEmails, verifyBusinessEmail } from "../services/business.js";
 import { isDuplicateHandler, isValidString } from "../services/utils.js";
 import { getDefaultRoleId, getOwnerRoleId } from "../services/roles.js";
 import { canEditBusiness, canInviteMembers, canViewBusiness, checkPermission } from "../middleware/permissions.js";
@@ -36,9 +36,7 @@ const requireVerifiedEmail = async (req, res, next) => {
         const { businessId } = req.params;
         const { email } = req.authUser;
 
-        const validEmailsObj = await getVerifiedEmails(businessId);
-        const validEmails = validEmailsObj.map((emailObj) => emailObj.email);
-        const isValid = validEmails.includes(email);
+        const isValid = await verifyBusinessEmail({ businessId, email });
 
         if(!isValid)
             return res.stats(404).json({

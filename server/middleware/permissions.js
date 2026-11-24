@@ -23,7 +23,7 @@ async function permissionsWrapper(permItem, req, res, next){
         const hasPermissions = await checkPermission(permItem, userId, businessId);
 
         if(!hasPermissions)
-            return res.status(404).json({
+            return res.status(401).json({
                 message: 'you dont have permissions to do such thing bozo'
             });
         next();
